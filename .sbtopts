@@ -1,0 +1,4 @@
+# -J-XX:+PrintFlagsFinal
+# -J-XX:-DoEscapeAnalysis
+# -J-XX:-Inline
+# -J-XX:-UseCompiler
