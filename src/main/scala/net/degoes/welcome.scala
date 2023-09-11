@@ -14,6 +14,6 @@ object welcome {
   //
   //    START     :  7:00 London Time
   //    BIG BREAK :  8:45 London Time
-  //    RESUME    :  9:30 London Time
+  //    RESUME    :  9:20 London Time
   //    END       : 11:00 London Time
 }

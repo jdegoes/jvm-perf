@@ -7,7 +7,8 @@ In this 5-day workshop, the participants will learn about the two major runtime 
 ## Who Should Attend
 
 Engineers, SREs and tech leads responsible for production JVM applications.
-Prerequisites
+
+## Prerequisites
 
 Basic knowledge of the JVM; basic experience running JVM applications in production.
 
@@ -53,7 +54,7 @@ Attendance at this workshop is fully remote. Attendees will be provided with a l
 5. Launch project provided `sbt`.
 
     ```bash
-    cd advanced-zio; ./sbt
+    cd jvm-perf; ./sbt
     ```
 6. Enter continuous compilation mode.
 
