@@ -55,14 +55,70 @@ class ElementPrependBenchmark {
   var size: Int = _
 
   var startList: List[String] = _
+  var startVector: Vector[String] = _ 
+  var startArray: Array[String] = _ 
 
   @Setup(Level.Trial)
-  def setup(): Unit =
+  def setup(): Unit = {
     startList = List.fill(size)("a")
+    startVector = Vector.fill(size)("a")
+    startArray = Array.fill(size)("a")
+  }
 
   @Benchmark
   def list(blackhole: Blackhole): Unit =
     blackhole.consume("a" :: startList)
+
+  @Benchmark
+  def vector(blackhole: Blackhole): Unit =
+    blackhole.consume("a" +: startVector)
+
+  @Benchmark
+  def array(blackhole: Blackhole): Unit =
+    blackhole.consume("a" +: startArray)
+}
+
+@State(Scope.Thread)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@BenchmarkMode(Array(Mode.Throughput))
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+@Threads(1)
+class ElementAppendBenchmark {
+  import zio.Chunk 
+
+  @Param(Array("1000", "10000", "100000"))
+  var size: Int = _
+
+  var startList: List[String] = _
+  var startVector: Vector[String] = _ 
+  var startArray: Array[String] = _ 
+  var startChunk: Chunk[String] = _ 
+
+  @Setup(Level.Trial)
+  def setup(): Unit = {
+    startList = List.fill(size)("a")
+    startVector = Vector.fill(size)("a")
+    startArray = Array.fill(size)("a")
+    startChunk = Chunk.fill(size)("a")
+  }
+
+  @Benchmark
+  def list(blackhole: Blackhole): Unit =
+    blackhole.consume(startList :+ "a")
+
+  @Benchmark
+  def vector(blackhole: Blackhole): Unit =
+    blackhole.consume(startVector :+ "a")
+
+  @Benchmark
+  def array(blackhole: Blackhole): Unit =
+    blackhole.consume(startArray :+ "a")
+
+  @Benchmark
+  def chunk(blackhole: Blackhole): Unit =
+    blackhole.consume(startChunk :+ "a")
 }
 
 /**
@@ -79,11 +135,39 @@ class ElementPrependBenchmark {
 @Fork(1)
 @Threads(1)
 class ConcatBenchmark {
+  import zio.Chunk 
+
+  @Param(Array("1000", "10000", "100000"))
+  var size: Int = _
+
+  var startList: List[String] = _
+  var startVector: Vector[String] = _ 
+  var startArray: Array[String] = _ 
+  var startChunk: Chunk[String] = _ 
+
   @Setup(Level.Trial)
-  def setup(): Unit = ()
+  def setup(): Unit = {
+    startList = List.fill(size)("a")
+    startVector = Vector.fill(size)("a")
+    startArray = Array.fill(size)("a")
+    startChunk = Chunk.fill(size)("a")
+  }
 
   @Benchmark
-  def list(blackhole: Blackhole): Unit = ()
+  def list(blackhole: Blackhole): Unit = 
+    blackhole.consume(startList ++ startList)
+
+  @Benchmark
+  def array(blackhole: Blackhole): Unit = 
+    blackhole.consume(startArray ++ startArray)
+
+  @Benchmark
+  def vector(blackhole: Blackhole): Unit = 
+    blackhole.consume(startVector ++ startVector)
+
+  @Benchmark
+  def chunk(blackhole: Blackhole): Unit = 
+    blackhole.consume(startChunk ++ startChunk)
 }
 
 /**
@@ -100,11 +184,60 @@ class ConcatBenchmark {
 @Fork(1)
 @Threads(1)
 class RandomAccessBenchmark {
+  import zio.Chunk 
+
+  @Param(Array("10", "100", "1000"))
+  var size: Int = _
+
+  var startList: List[String] = _
+  var startVector: Vector[String] = _ 
+  var startArray: Array[String] = _ 
+  var startChunk: Chunk[String] = _ 
+
   @Setup(Level.Trial)
-  def setup(): Unit = ()
+  def setup(): Unit = {
+    startList = List.fill(size)("a")
+    startVector = Vector.fill(size)("a")
+    startArray = Array.fill(size)("a")
+    startChunk = Chunk.fill(size)("a")
+  }
 
   @Benchmark
-  def list(blackhole: Blackhole): Unit = ()
+  def list(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      blackhole.consume(startList(i))
+      i = i + 1
+    }
+  }
+
+  @Benchmark
+  def array(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      blackhole.consume(startArray(i))
+      i = i + 1
+    }
+  }
+
+  @Benchmark
+  def vector(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      blackhole.consume(startVector(i))
+      i = i + 1
+    }
+  }
+
+  @Benchmark
+  def chunk(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      blackhole.consume(startChunk(i))
+      i = i + 1
+    }
+  }
+    
 }
 
 /**
@@ -126,11 +259,64 @@ class RandomAccessBenchmark {
 @Fork(1)
 @Threads(1)
 class IterationBenchmark {
+  import zio.Chunk 
+
+  @Param(Array("100", "1000", "10000"))
+  var size: Int = _
+
+  var startList: List[String] = _
+  var startVector: Vector[String] = _ 
+  var startArray: Array[String] = _ 
+  var startChunk: Chunk[String] = _ 
+
   @Setup(Level.Trial)
-  def setup(): Unit = ()
+  def setup(): Unit = {
+    startList = List.fill(size)("a")
+    startVector = Vector.fill(size)("a")
+    startArray = Array.fill(size)("a")
+    startChunk = Chunk.fill(size)("a")
+  }
 
   @Benchmark
-  def list(blackhole: Blackhole): Unit = ()
+  def listForeach(blackhole: Blackhole): Unit = 
+    startList.foreach(blackhole.consume(_))
+
+  @Benchmark
+  def listIterator(blackhole: Blackhole): Unit = {
+    val iterator = startList.iterator 
+
+    while (iterator.hasNext) {
+      blackhole.consume(iterator.next())
+    }
+  }
+
+  @Benchmark
+  def array(blackhole: Blackhole): Unit = {
+    var i = 0 
+    while (i < startArray.length) {
+      blackhole.consume(startArray(i))
+      i = i + 1
+    }
+  }
+
+  @Benchmark
+  def vector(blackhole: Blackhole): Unit = {
+    var i = 0 
+    while (i < startVector.length) {
+      blackhole.consume(startVector(i))
+      i = i + 1
+    }
+  }
+    
+
+  @Benchmark
+  def chunk(blackhole: Blackhole): Unit = {
+    var i = 0 
+    while (i < startChunk.length) {
+      blackhole.consume(startChunk(i))
+      i = i + 1
+    }
+  }
 }
 
 /**

@@ -9,10 +9,10 @@ object AlgorithmsSpec extends ZIOSpecDefault {
         test("findMostPopularFriend - 3 person social network") {
           val network = 
             SocialNetwork(
-              List(
-                Person(0, 20, "John", List(1)),
-                Person(1, 30, "Jane", List(0, 2)),
-                Person(2, 40, "Fred", List(1))
+              Vector(
+                Person(0, 20, "John", Set(1)),
+                Person(1, 30, "Jane", Set(0, 2)),
+                Person(2, 40, "Fred", Set(1))
               )
             )
           val result = network.findMostPopularFriend

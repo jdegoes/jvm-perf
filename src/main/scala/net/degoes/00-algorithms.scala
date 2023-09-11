@@ -19,29 +19,36 @@ import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 
-final case class Person(id: Int, age: Int, name: String, follows: List[Int])
+final case class Person(id: Int, age: Int, name: String, follows: Set[Int])
 
-final case class SocialNetwork(people: Seq[Person]) {
-  def getFriendsOf(id: Int): Seq[Int] = {
+final case class SocialNetwork(people: Vector[Person]) {
+  def getFriendsOf(id: Int): Set[Int] = {
+    // n = number of people 
+    // m = max number of follows
+
     // Retrieve all the people that $id follows:
     val follows = people(id).follows
-
+    
     // Return only the people that follow $id back ("friends"):
-    follows.filter { candidateId =>
+    follows.filter { candidateId => // m 
       val candidate = people(candidateId)
 
-      candidate.follows.contains(id)
-    }
+      candidate.follows.contains(id) // m 
+    } // m
   }
 
   def findMostPopularFriend: Option[Int] = {
+    // O(n * m)
+    // n = number of people
     val personAndFriendCount =
       people.map { person =>
         // Map to tuple of person id and number of friends:
         (person.id, getFriendsOf(person.id).size)
-      }
+      } // n
 
-    val mostPopular = personAndFriendCount.maxByOption(_._2)
+    val mostPopular = personAndFriendCount.maxByOption(_._2) // n 
+
+    // 2 * n 
 
     mostPopular.map(_._1)
   }
@@ -50,8 +57,8 @@ object SocialNetwork                                {
   // Deterministic RNG:
   private val rng = new scala.util.Random(0L)
 
-  def random(people: Int, friendsPerPerson: Int): SocialNetwork =
-    SocialNetwork {
+  def random(people: Int, friendsPerPerson: Int): SocialNetwork = {
+    val seq = 
       (0 until people).map { id =>
         Person(
           id,
@@ -59,10 +66,11 @@ object SocialNetwork                                {
           s"Person $id",
           (0 until friendsPerPerson).map { _ =>
             rng.nextInt(people)
-          }.toList
+          }.toSet
         )
-      }
-    }
+      }.toVector
+    SocialNetwork(seq)
+  }
 }
 
 /**
@@ -104,7 +112,28 @@ object SocialNetwork                                {
  * performance. Test your potential improvements using the benchmark, and do not stop iterating
  * until you have found a solution that scales better with both network size and friend count.
  */
+@State(Scope.Thread)
+@OutputTimeUnit(TimeUnit.SECONDS)
+@BenchmarkMode(Array(Mode.Throughput))
+@Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Fork(1)
+@Threads(1)
 class FindMostPopularFriendBenchmark {
+  @Param(Array("100", "1000", "10000"))
+  var networkSize: Int = _ 
+
+  @Param(Array("10", "100", "1000"))
+  var friendsPerPerson: Int = _ 
+
+  var network: SocialNetwork = _ 
+
+  @Setup 
+  def setup(): Unit = 
+    network = SocialNetwork.random(networkSize, friendsPerPerson)
+
   @Benchmark
-  def findMostPopularFriend(blackHole: Blackhole): Unit = ()
+  def findMostPopularFriend(blackhole: Blackhole): Unit = {
+    blackhole.consume(network.findMostPopularFriend)
+  }
 }
