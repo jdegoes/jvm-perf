@@ -13,6 +13,7 @@ package net.degoes.tools
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
+import java.util.ArrayList
 
 /**
  * EXERCISE 1
@@ -80,7 +81,7 @@ class PrintInliningBenchmark {
  *
  * Profilers can be incredibly useful for identifying performance bottlenecks. Even though it is
  * hard to optimize against a profiling, a profiler can help you identify the most expensive
- * sections of code, which you can then benchmark and optimize.
+ * sections of code (in terms of CPU or memory), which you can then benchmark and optimize.
  *
  * In this exercise, you will take your benchmark tool of choice to identify performance bottlenecks
  * in the provided code. You can use this information in the next module.
@@ -118,4 +119,32 @@ object ProfilerExample {
       i = i + 1L
     }
   }
+}
+
+/**
+ * EXERCISE 4
+ *
+ * Sometimes, you need to see something closer to the raw bytecode that your compiler generates.
+ * This is especially true when you are using higher-level languages like Kotlin, Scala, and
+ * Clojure, because these languages have features that do not map directly to JVM bytecode.
+ *
+ * In order to do this, you can use the `javap` method with the following flags:
+ *
+ *   - `-c` prints out the bytecode
+ *   - `-l` prints out line numbers
+ *   - `-p` prints out private methods
+ *   - `-s` prints out internal type signatures
+ *   - `-v` prints out verbose information
+ */
+@State(Scope.Thread)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@BenchmarkMode(Array(Mode.Throughput))
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "XX:-Inline"))
+@Threads(1)
+class JavapBenchmark {
+  @Param(Array("1000", "10000", "100000"))
+  var size: Int = _
+
 }
