@@ -11,7 +11,7 @@
  * that is commonly used on the JVM. Note that while these code examples are written in Scala, you
  * are free to work exercises in the language of your choice, including Kotlin, Java, or Clojure.
  * The principles you will learn in this workshop apply uniformly to all JVM languages, and most of
- * them apply even more broadly, to other langauges beyond the JVM.
+ * them apply even more broadly, to other languages beyond the JVM.
  */
 package net.degoes.algorithms
 
