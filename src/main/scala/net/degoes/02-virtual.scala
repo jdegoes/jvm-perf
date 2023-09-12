@@ -53,11 +53,15 @@ class PolyBenchmark {
   var size: Int = _
 
   var poly_operators: Chunk[Operator] = _
-  // var mono_operators: Chunk[Operator.DividedBy.type] = _
+  var mono_operators: Chunk[Operator] = _
 
   @Setup
   def setupPoly(): Unit =
     poly_operators = Operator.randomN(size)
+
+  @Setup
+  def setupMono(): Unit =
+    mono_operators = Chunk.fill(size)(Operator.DividedBy)
 
   @Benchmark
   def poly(blackhole: Blackhole): Unit = {
@@ -65,6 +69,20 @@ class PolyBenchmark {
     var result = 0
     while (i < size) {
       val operator = poly_operators(i)
+
+      result = operator(result, i + 1)
+
+      i = i + 1
+    }
+    blackhole.consume(result)
+  }
+
+  @Benchmark
+  def mono(blackhole: Blackhole): Unit = {
+    var i      = 0
+    var result = 0
+    while (i < size) {
+      val operator = mono_operators(i)
 
       result = operator(result, i + 1)
 
@@ -136,6 +154,10 @@ class PolySimBenchmark {
   @Benchmark
   def invokeStatic(blackhole: Blackhole): Unit =
     blackhole.consume(is.address.value)
+
+  @Benchmark 
+  def invokeDynamic(blackhole: Blackhole): Unit = 
+    blackhole.consume(obj.meta.vtable(iv.method).value)
 
   case class JVMObject(data: Any, meta: JVMClassMetadata)
   case class JVMClassMetadata(clazz: String, vtable: Map[JVMMethod, Address])

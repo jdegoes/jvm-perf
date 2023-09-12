@@ -39,8 +39,12 @@ class AllocBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
 
+  var preallocated: Array[AnyRef] = _ 
+
   @Setup
-  def setup(): Unit = {}
+  def setup(): Unit = {
+    preallocated = Array.fill(size)(new {})
+  }
 
   @Benchmark
   def alloc(blackhole: Blackhole): Unit = {
@@ -54,7 +58,16 @@ class AllocBenchmark {
   }
 
   @Benchmark
-  def noAlloc(blackhole: Blackhole): Unit = ()
+  def noAlloc(blackhole: Blackhole): Unit = {
+    var sum = 0
+    var i   = 0
+    while (i < size) {
+      val obj = preallocated(i)
+      sum = sum + obj.hashCode()
+      i = i + 1
+    }
+    blackhole.consume(sum)
+  }
 }
 
 /**
@@ -81,8 +94,20 @@ class CopyAllocBenchmark {
     people = Chunk.fromIterable(0 until size).map(Person(_))
 
   @Benchmark
-  def alloc(): Unit =
-    people.map(p => p.copy(age = p.age + 1))
+  def alloc(blackhole: Blackhole): Unit = {
+    blackhole.consume(people.map(p => p.copy(age = p.age + 1)))
+  }
+
+  @Benchmark 
+  def noAlloc(blackhole: Blackhole): Unit = {
+    var i = 0 
+    while (i < people.length) {
+      val person = people(i)
+      person.age += 1
+      i = i + 1 
+    }
+    blackhole.consume(people)
+  }
 
   case class Person(var age: Int)
 }
@@ -111,7 +136,7 @@ class MarkSweepBenchmark {
 
   val ObjSize = 10
 
-  @Param(Array("1000", "10000", "100000"))
+  @Param(Array("1000"))
   var size: Int = _
 
   var heap: Heap              = _
@@ -142,7 +167,29 @@ class MarkSweepBenchmark {
   }
 
   @Benchmark
-  def markSweep(blackhole: Blackhole): Unit = ()
+  def markSweep(blackhole: Blackhole): Unit = {
+    def mark(root: Obj): Unit = {
+      if (root.marked) () 
+      else {
+        root.marked = true 
+
+        root.data.foreach {
+          case Data.Integer(_) => ()
+          case Data.Pointer(child) => mark(child)
+        }
+      }
+    }
+
+    rootObjects.foreach(mark(_))
+
+    var i = 0 
+    val len = heap.objects.length
+    while (i < len) {
+      val obj = heap.objects(i)
+      if (!obj.marked) blackhole.consume(obj.marked)
+      i = i + 1
+    }
+  }
 
   sealed trait Data
   object Data {
