@@ -36,8 +36,8 @@ class Estimation1Benchmark {
   @Param(Array("1000", "10000"))
   var size: Int = _
 
-  var list: List[Int]   = _
-  var array: Array[Int] = _
+  var list: List[Int]                 = _
+  var array: Array[java.lang.Integer] = _
 
   @Setup
   def setup(): Unit = {
@@ -47,7 +47,7 @@ class Estimation1Benchmark {
 
   // Cons(head1, Cons(head2, Cons(head3, ...)))
   @Benchmark
-  def add1(blackhole: Blackhole): Unit = {
+  def list(blackhole: Blackhole): Unit = {
     val iterator = list.iterator
 
     var sum = 0
@@ -59,7 +59,7 @@ class Estimation1Benchmark {
   }
 
   @Benchmark
-  def add2(blackhole: Blackhole): Unit = {
+  def array(blackhole: Blackhole): Unit = {
     var i   = 0
     var sum = 0
     while (i < array.length) {
@@ -98,24 +98,45 @@ class Estimation2Benchmark {
     array = Array.from[Int](0 until size)
   }
 
+  def plus(left: Int, right: Int): Int = left + right
+
   @Benchmark
   def list(blackhole: Blackhole): Unit = {
-    def plus(left: Int, right: Int): Int = left + right
+    val s = sum(list.map(plus(1, _)))
 
-    val sum = list.map(plus(1, _)).sum
-
-    blackhole.consume(sum)
+    blackhole.consume(s)
   }
 
   @Benchmark
-  def array(blackhole: Blackhole): Unit = {
-    def plus(left: Int, right: Int): Int = left + right
+  def array_boxing(blackhole: Blackhole): Unit = {
+    val s = sum(array.map { value =>
+      val newValue = IntAdder.add(value, 1)
 
-    val increment = plus(1, _)
+      newValue
+    })
 
-    val sum = array.map(plus(1, _)).sum
+    blackhole.consume(s)
+  }
 
-    blackhole.consume(sum)
+  def sum(list: List[Int]): Int   = {
+    var sum = 0
+    var cur = list
+    while (!cur.isEmpty) {
+      sum += cur.head
+
+      cur = cur.tail
+    }
+    sum
+  }
+  def sum(array: Array[Int]): Int = {
+    var sum = 0
+    var i   = 0
+    val len = array.length
+    while (i < len) {
+      sum += array(i)
+      i = i + 1
+    }
+    sum
   }
 
   @Benchmark
@@ -228,15 +249,17 @@ class Estimation4Benchmark {
 
   var operations1: Array[Int => Int]          = _
   var operations2: Array[ElementChanger[Int]] = _
+  var operations3: Array[IntegerChanger]      = _
 
   @Setup
   def setup(): Unit = {
     operations1 = Array.from((0 until size).map(index => Adders(index % Adders.length)))
     operations2 = Array.fill(size)(Adder)
+    operations3 = Array.fill(size)(Adder2)
   }
 
   @Benchmark
-  def ops1(blackhole: Blackhole): Unit = {
+  def poly(blackhole: Blackhole): Unit = {
     var i      = 0
     var result = 0
     while (i < size) {
@@ -248,7 +271,7 @@ class Estimation4Benchmark {
   }
 
   @Benchmark
-  def ops2(blackhole: Blackhole): Unit = {
+  def monoBoxed(blackhole: Blackhole): Unit = {
     var i      = 0
     var result = 0
     while (i < size) {
@@ -259,8 +282,28 @@ class Estimation4Benchmark {
     blackhole.consume(result)
   }
 
+  @Benchmark
+  def monoUnboxed(blackhole: Blackhole): Unit = {
+    var i      = 0
+    var result = 0
+    while (i < size) {
+      val op = operations3(i)
+      result = op.change(result)
+      i = i + 1
+    }
+    blackhole.consume(result)
+  }
+
   trait ElementChanger[T] {
     def change(t: T): T
   }
   val Adder: ElementChanger[Int] = (i: Int) => i + 1
+
+  trait IntegerChanger {
+    def change(t: Int): Int
+  }
+  val Adder2: IntegerChanger =
+    new IntegerChanger {
+      def change(t: Int): Int = t + 1
+    }
 }
