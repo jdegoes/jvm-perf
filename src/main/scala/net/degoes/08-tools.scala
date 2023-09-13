@@ -142,11 +142,11 @@ object ProfilerExample {
  * generated code that you would expect to be fast.
  */
 @State(Scope.Thread)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "XX:-Inline"))
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
 @Threads(1)
 class JavapBenchmark {
   val rng = new scala.util.Random(0L)
@@ -160,10 +160,10 @@ class JavapBenchmark {
   def setup(): Unit =
     program = (0 until size).foldLeft(State.succeed[Int, Int](0)) { (acc, _) =>
       for {
-        s <- acc
+        _ <- acc
         i <- State.getState[Int]
         _ <- State.setState(i + 1)
-      } yield s + i
+      } yield i + 1
     }
 
   @Benchmark
@@ -187,14 +187,15 @@ class JavapBenchmark {
         var stack: List[Any => State[S, Any]]       = Nil
         def continueWith(value: Any): State[S, Any] =
           stack match {
-            case Nil        =>
+            case Nil         =>
               result = value.asInstanceOf[A]
               null
-            case f :: stack =>
+            case f :: stack0 =>
+              stack = stack0
               f(value)
           }
 
-        while (result != null)
+        while (next != null)
           next = next match {
             case State.GetState()        =>
               continueWith(state)
