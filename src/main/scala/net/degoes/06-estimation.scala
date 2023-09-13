@@ -195,8 +195,8 @@ class Estimation3Benchmark {
   def checkInt1(blackhole: Blackhole): Unit = {
     def isInt(s: String): Boolean =
       try {
-        s.toInt
-        false
+        s.toIntOption
+        true
       } catch {
         case _: NumberFormatException => false
       }
@@ -223,6 +223,27 @@ class Estimation3Benchmark {
     }
     blackhole.consume(ints)
   }
+
+  @Benchmark
+  def checkInt3(blackhole: Blackhole): Unit = {
+    def isInt(s: String): Boolean = {
+      var i = 0
+      val len = s.length
+      while(i < len) {
+        if (!s.charAt(i).isDigit) return false
+        i += 1
+      }
+      true
+    }
+
+    var i    = 0
+    var ints = 0
+    while (i < maybeInts.length) {
+      if (isInt(maybeInts(i))) ints += 1
+      i = i + 1
+    }
+    blackhole.consume(ints)
+  }
 }
 
 /**
@@ -238,7 +259,7 @@ class Estimation3Benchmark {
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array())
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
 @Threads(1)
 class Estimation4Benchmark {
   @Param(Array("1000", "10000"))

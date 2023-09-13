@@ -14,6 +14,7 @@ import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 import scala.util.control.NoStackTrace
+import scala.reflect.ClassTag
 
 /**
  * EXERCISE 1
@@ -31,14 +32,14 @@ import scala.util.control.NoStackTrace
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-Inline", "-XX:-DoEscapeAnalysis"))
 @Threads(1)
 class UseNullBenchmark {
   @Param(Array("10000", "1000000"))
   var size: Int = _
 
   sealed trait Optional[+A] {
-    final def orElse[B >: A](that: => Optional[B]): Optional[B] =
+    final def orElse[B >: A](that: Optional[B]): Optional[B] =
       if (this == Optional.None) that else this
   }
   object Optional           {
@@ -60,7 +61,31 @@ class UseNullBenchmark {
   }
 
   @Benchmark
-  def nulls(blackhole: Blackhole): Unit = ()
+  def scalaOption(blackhole: Blackhole): Unit = {
+    var i                         = 0
+    var current: Option[String] = Some("a")
+    val cutoff                    = size - 10
+    while (i < size) {
+      val some = Some("a")
+      if (i > cutoff) current = None
+      else current = current.orElse(some)
+      i = i + 1
+    }
+    blackhole.consume(current)
+  }
+
+  @Benchmark
+  def nulls(blackhole: Blackhole): Unit = {
+    var i       = 0
+    var current = "a"
+    val cutoff  = size - 10
+    while (i < size) {
+      if (i > cutoff) current = null 
+      else current = if (current ne null) current else "a"
+      i = i + 1
+    }
+    blackhole.consume(current)
+  }
 }
 
 /**
@@ -88,10 +113,13 @@ class UseArraysBenchmark {
   var size: Int = _
 
   var list: List[Float] = _
+  var arr: Array[Float] = _
 
   @Setup
-  def setup(): Unit =
+  def setup(): Unit = {
     list = List.fill(size)(rng.nextFloat)
+    arr = Array.fill(size)(rng.nextFloat)
+  }
 
   @Benchmark
   def list(blackhole: Blackhole): Unit = {
@@ -100,6 +128,7 @@ class UseArraysBenchmark {
     val listBuilder = List.newBuilder[Float]
     var x1          = current.head
     var x2          = current.head
+    listBuilder.sizeHint(size)
     while (i < size) {
       val x3 = current.head
 
@@ -114,7 +143,38 @@ class UseArraysBenchmark {
   }
 
   @Benchmark
-  def array(blackhole: Blackhole): Unit = ()
+  def array(blackhole: Blackhole): Unit = {
+    var i           = 0
+    var x1          = arr(0)
+    var x2          = arr(0)
+    while (i < size) {
+      val x3 = arr(i)
+
+      arr(i) = ((x1 + x2 + x3) / 3)
+
+      i = i + 1
+      x1 = x2
+      x2 = x3
+    }
+    blackhole.consume(arr)
+  }
+
+  @annotation.tailrec 
+  final def buildList(n: Int, acc: List[Int]): List[Int] = 
+    if (n <= 0) acc 
+    else buildList(n - 1, n :: acc)
+
+  class ArrayPrepender[T: ClassTag](capacity: Int) {
+    val array = Array.ofDim[T](capacity)
+    var size  = 0 
+
+    def apply(index: Int): T = array((size - 1) - index)
+
+    def prepend(a: T): Unit = {
+      array(size) = a 
+      size += 1
+    }
+  }
 }
 
 /**
