@@ -45,6 +45,7 @@ class Estimation1Benchmark {
     array = Array.from(0 until size).map(new java.lang.Integer(_))
   }
 
+  // Cons(head1, Cons(head2, Cons(head3, ...)))
   @Benchmark
   def add1(blackhole: Blackhole): Unit = {
     val iterator = list.iterator
@@ -67,12 +68,6 @@ class Estimation1Benchmark {
     }
     blackhole.consume(sum)
   }
-
-  trait Adder[A] {
-    def add(left: A, right: A): A
-  }
-  val IntAdder: Adder[Int] =
-    (left: Int, right: Int) => left + right
 }
 
 /**
@@ -104,7 +99,7 @@ class Estimation2Benchmark {
   }
 
   @Benchmark
-  def add1(blackhole: Blackhole): Unit = {
+  def list(blackhole: Blackhole): Unit = {
     def plus(left: Int, right: Int): Int = left + right
 
     val sum = list.map(plus(1, _)).sum
@@ -113,15 +108,30 @@ class Estimation2Benchmark {
   }
 
   @Benchmark
-  def add2(blackhole: Blackhole): Unit = {
-    val sum = array.map { value =>
-      val newValue = IntAdder.add(value, 1)
+  def array(blackhole: Blackhole): Unit = {
+    def plus(left: Int, right: Int): Int = left + right
 
-      newValue
-    }.sum
+    val increment = plus(1, _)
+
+    val sum = array.map(plus(1, _)).sum
 
     blackhole.consume(sum)
   }
+
+  @Benchmark
+  def arraySpecialized(blackhole: Blackhole): Unit = {
+    def plus(left: Int, right: Int): Int = left + right
+
+    val sum = array.map(IntIncrementer.increment(_)).sum
+
+    blackhole.consume(sum)
+  }
+
+  trait Incrementer {
+    def increment(int: Int): Int 
+  }
+
+  val IntIncrementer: Incrementer = (x: Int) => x + 1
 
   trait Adder[A] {
     def add(left: A, right: A): A

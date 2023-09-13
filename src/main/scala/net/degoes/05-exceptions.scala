@@ -30,10 +30,16 @@ class ThrowExceptionBenchmark {
   case class MyException(message: String) extends Exception(message)
 
   @Benchmark
-  def throwCatchException(): Unit = ???
+  def throwCatchException(): Unit = 
+    try {
+      throw MyException("Uh oh!")
+    } catch {
+      case _ : Throwable => ()
+    }
 
   @Benchmark
-  def constructException(): Unit = ???
+  def constructException(blackhole: Blackhole): Unit =
+    blackhole.consume(MyException("Uh oh!"))
 }
 
 /**
@@ -61,7 +67,9 @@ class ThrowSameExceptionBenchmark {
   catch { case _: Throwable => () }
 
   @Benchmark
-  def throwCatchSameException(): Unit = ??? // TODO
+  def throwCatchSameException(): Unit = 
+    try throw exception 
+    catch { case _ : Throwable => () }
 }
 
 /**
@@ -83,10 +91,50 @@ class FillInStackTraceBenchmark {
   val exception = MyException("Hello")
 
   @Benchmark
-  def fillInStackTrace(): Unit = ??? // TODO
+  def fillInStackTrace(blackhole: Blackhole): Unit = {
+    exception.fillInStackTrace()
+    blackhole.consume(exception)
+  }
 
   @Benchmark
   def throwCatchNewException(): Unit = try
     throw MyException("Hello")
   catch { case _: Throwable => () }
+}
+
+
+/**
+ * EXERCISE 4
+ *
+ * Develop a benchmark to measure the overhead of try/catch distinct from the overhead of exceptions.
+ */
+@State(Scope.Thread)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@BenchmarkMode(Array(Mode.Throughput))
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(value = 1, jvmArgsAppend = Array())
+@Threads(1)
+class TryCatchOverheadBenchmark {
+  sealed abstract class Bool(message: String) extends Exception(message)
+  object Bool {
+    case object False extends Bool("true")
+    case object True extends Bool("false")
+  }
+
+  var bool: Bool = Bool.True
+
+  @Benchmark
+  def tryCatch(blackhole: Blackhole): Unit = 
+    try throw bool
+    catch { 
+      case t : Throwable => blackhole.consume(t eq Bool.True)
+    }
+
+  @Benchmark
+  def values(blackhole: Blackhole): Unit = {
+    val x = bool 
+
+    blackhole.consume(x eq Bool.True)
+  }
 }
