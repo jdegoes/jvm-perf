@@ -82,7 +82,7 @@ class Estimation1Benchmark {
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array())
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
 @Threads(1)
 class Estimation2Benchmark {
   @Param(Array("1000", "10000"))
@@ -158,7 +158,7 @@ class Estimation2Benchmark {
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array())
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
 @Threads(1)
 class Estimation3Benchmark {
   val rng = new scala.util.Random(0L)
@@ -222,7 +222,7 @@ class Estimation3Benchmark {
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array())
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
 @Threads(1)
 class Estimation4Benchmark {
   @Param(Array("1000", "10000"))
@@ -243,7 +243,7 @@ class Estimation4Benchmark {
   }
 
   @Benchmark
-  def poly(blackhole: Blackhole): Unit = {
+  def ops1(blackhole: Blackhole): Unit = {
     var i      = 0
     var result = 0
     while (i < size) {
@@ -255,7 +255,7 @@ class Estimation4Benchmark {
   }
 
   @Benchmark
-  def monoBoxed(blackhole: Blackhole): Unit = {
+  def ops2(blackhole: Blackhole): Unit = {
     var i      = 0
     var result = 0
     while (i < size) {
@@ -267,7 +267,7 @@ class Estimation4Benchmark {
   }
 
   @Benchmark
-  def monoUnboxed(blackhole: Blackhole): Unit = {
+  def ops3(blackhole: Blackhole): Unit = {
     var i      = 0
     var result = 0
     while (i < size) {

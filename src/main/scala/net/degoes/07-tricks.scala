@@ -569,6 +569,154 @@ class NoExceptionsBenchmark {
 }
 
 /**
+  * EXERCISE 11
+  * 
+  * Hash maps can offer quite high performance (O(1)), but never as high performance as array 
+  * lookups (lower constant factor). To accelerate some code, you can switch from using non-integer
+  * sparse keys to using dense integer keys, which lets you replace the map with an array.
+  *
+  * In this exercise, create an equivalent implementation to the provided one that uses arrays
+  * instead of maps and observe the effects on performance.
+  */
+@State(Scope.Thread)
+@OutputTimeUnit(TimeUnit.SECONDS)
+@BenchmarkMode(Array(Mode.Throughput))
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(value = 1, jvmArgsAppend = Array())
+@Threads(1)
+class MapToArrayBenchmark {
+  import zio.Chunk 
+
+  @Param(Array("10000", "100000"))
+  var size: Int = _ 
+
+  val rng = new scala.util.Random(0L)
+
+  var allData: Chunk[Data] = _ 
+  val transformation = 
+    Transformation(
+      Map(
+        Component.Email -> Operation.Identity,
+        Component.Name -> Operation.Identity,
+        Component.Phone -> Operation.Identity,
+        Component.Age -> Operation.Identity,
+        Component.Zip -> Operation.Identity,
+        Component.City -> Operation.Identity,
+        Component.State -> Operation.Identity,
+        Component.Country -> Operation.Identity
+      )
+    )
+
+  @Setup 
+  def setup(): Unit = {
+    allData = Chunk.fill(size) {
+      Data(
+        email = rng.nextString(10),
+        name = rng.nextString(10),
+        phone = rng.nextString(10),
+        age = rng.nextString(10),
+        zip = rng.nextString(10),
+        city = rng.nextString(10),
+        state = rng.nextString(10),
+        country = rng.nextString(10)
+      )
+    }
+  }
+
+  @Benchmark
+  def map(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      val data = allData(i)
+      transformData(data, transformation)
+      i = i + 1
+    }
+  }
+
+  def transformData(data: Data, transformation: Transformation): Unit = {
+    transformation.map.foreach { case (component, operation) =>
+      component match {
+        case Component.Email => 
+          data.email = operation(data.email)
+        case Component.Name =>
+          data.name = operation(data.name)
+        case Component.Phone =>
+          data.phone = operation(data.phone)
+        case Component.Age =>
+          data.age = operation(data.age)
+        case Component.Zip =>
+          data.zip = operation(data.zip)
+        case Component.City =>
+          data.city = operation(data.city)
+        case Component.State =>
+          data.state = operation(data.state)
+        case Component.Country =>
+          data.country = operation(data.country)
+        case _ => () 
+      }
+    }
+  }
+  case class Data(
+    var email: String,
+    var name: String,
+    var phone: String,
+    var age: String,
+    var zip: String,
+    var city: String,
+    var state: String,
+    var country: String
+  )
+  case class Transformation(map: Map[Component, Operation])
+  case class Component(name: String)
+  object Component {
+    val All: Chunk[Component] = Chunk(
+      Component.Email,
+      Component.Name,
+      Component.Phone,
+      Component.Age,
+      Component.Zip,
+      Component.City,
+      Component.State,
+      Component.Country
+    )
+
+    val Email = Component("email")
+    val Name  = Component("name")
+    val Phone = Component("phone")
+    val Age   = Component("age")
+    val Zip   = Component("zip")
+    val City  = Component("city")
+    val State = Component("state")
+    val Country = Component("country")
+  }
+  sealed trait Operation {
+    def apply(value: String): String = 
+      this match {
+        case Operation.Identity => 
+          value 
+        case Operation.Anonymize(full) => 
+          if (full) "*****"
+          else value.take(3) + "*****"
+        case Operation.Encrypt(key) => 
+          value.map(c => (c ^ key.hashCode).toChar)
+        case Operation.Uppercase => 
+          value.toUpperCase
+        case Operation.Composite(left, right) => 
+          right(left(value))
+      }
+  }
+  object Operation {
+    case object Identity extends Operation
+    case class Anonymize(full: Boolean) extends Operation 
+    case class Encrypt(key: String) extends Operation 
+    case object Uppercase extends Operation
+    case class Composite(left: Operation, right: Operation) extends Operation
+  }
+}
+
+
+/**
  * GRADUATION PROJECT
  *
  * Sometimes you can transform a process that is built using interfaces and classes (a so-called
