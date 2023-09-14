@@ -207,9 +207,10 @@ class NoAllocationBenchmark {
   var size: Int = _
 
   var events: Array[Event] = _
+  var mutableMetrics: MutableMetricsMap = _ 
 
   @Setup
-  def setup(): Unit =
+  def setup(): Unit = {
     events = Array.fill(size) {
       val userIdx = rng.nextInt(users.length)
       val userId  = users(userIdx)
@@ -220,6 +221,10 @@ class NoAllocationBenchmark {
         case 2 => Event.AdConversion(userId)
       }
     }
+    mutableMetrics = MutableMetricsMap()
+
+    users.foreach(mutableMetrics.reserve(_))
+  }
 
   @Benchmark
   def immutable(blackhole: Blackhole): Unit = {
@@ -227,14 +232,21 @@ class NoAllocationBenchmark {
     var current = MetricsMap(Map.empty[UserId, Metrics])
     while (i < size) {
       val event = events(i)
-      current = current.aggregate(MetricsMap(event))
+      current = current.add(event)
       i = i + 1
     }
     blackhole.consume(current)
   }
 
   @Benchmark
-  def mutable(blackhole: Blackhole): Unit = ()
+  def mutable(blackhole: Blackhole): Unit = {
+    var i       = 0
+    while (i < size) {
+      mutableMetrics.add(events(i))
+      i = i + 1
+    }
+    blackhole.consume(mutableMetrics)
+  }
 
   type UserId = String
 
@@ -245,6 +257,40 @@ class NoAllocationBenchmark {
         adClicks = this.adClicks + that.adClicks,
         adConversions = this.adConversions + that.adConversions
       )
+  }
+
+  class MutableMetrics(var adViews: Int, var adClicks: Int, var adConversions: Int) {
+    def aggregate(newAdViews: Int, newAdClicks: Int, newAdConversions: Int): Unit = {
+      adViews += newAdViews 
+      adClicks += newAdClicks
+      adConversions += newAdConversions
+    }
+  }
+  object MutableMetrics {
+    def apply(): MutableMetrics = new MutableMetrics(0, 0, 0)
+  }
+  class MutableMetricsMap(map: java.util.Map[UserId, MutableMetrics]) { self =>
+    def reserve(userId: UserId): MutableMetrics = {    
+      var value: MutableMetrics = map.get(userId)
+
+      if (value eq null) {
+        value = MutableMetrics()
+        map.put(userId, value)
+      }
+      value 
+    }
+
+    def add(event: Event): Unit = {      
+      var value: MutableMetrics = reserve(event.userId)
+
+      if (event.isInstanceOf[Event.AdView]) value.aggregate(1, 0, 0)
+      else if (event.isInstanceOf[Event.AdClick]) value.aggregate(0, 1, 0)
+      else if (event.isInstanceOf[Event.AdConversion]) value.aggregate(0, 0, 1)
+    }
+  }
+  object MutableMetricsMap {
+    def apply(): MutableMetricsMap = 
+      new MutableMetricsMap(new java.util.HashMap[UserId, MutableMetrics]())
   }
 
   case class MetricsMap(map: Map[UserId, Metrics]) { self =>
