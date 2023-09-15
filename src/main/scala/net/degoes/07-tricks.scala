@@ -976,7 +976,7 @@ class MapToArrayBenchmark {
  * of the process.
  */
 @State(Scope.Thread)
-@OutputTimeUnit(TimeUnit.SECONDS)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
@@ -1218,7 +1218,7 @@ class StackInterpreterBenchmark {
                 stack(stackSize - 1) = f(first, second)
 
               case Instr.Pop =>
-                stackSize += 1
+                stackSize -= 1
             }
 
             instrIndex += 1
