@@ -989,12 +989,19 @@ class StackInterpreterBenchmark {
   val parser: RouteParser[(String, Int)] =
     Slash *> Literal("users") *> Slash *> StringVar <* Slash <* Literal("posts") <* Slash <*> IntVar
 
+  val parserOpt: opt.RouteParser[(String, Int)] = {
+    import opt.RouteParser._ 
+
+    Slash *> Literal("users") *> Slash *> StringVar <* Slash <* Literal("posts") <* Slash <*> IntVar
+  }
+
   @Benchmark
   def classic(blackhole: Blackhole): Unit =
     blackhole.consume(parser.parse("/users/jdegoes/posts/123"))
 
   @Benchmark
-  def interpreted(blackhole: Blackhole): Unit = ()
+  def interpreted(blackhole: Blackhole): Unit = 
+    blackhole.consume(parserOpt.parse("/users/jdegoes/posts/123"))
 
   sealed trait RouteParser[+A] {
     def parse(path: String): Option[(A, String)]
@@ -1136,11 +1143,89 @@ class StackInterpreterBenchmark {
 
       case object DoesNotMatch extends Exception("The route does not match the specified pattern") with NoStackTrace
 
-      private case class Compiled(instructions: Chunk[Instr]) {
+      private case class Compiled(instructions: Chunk[Instr], maxStack: Int) {
+        private val threadLocalStack: ThreadLocal[Array[Any]] = 
+          new ThreadLocal[Array[Any]] {
+            override def initialValue(): Array[Any] = 
+              Array.ofDim[Any](maxStack)
+          }
+
         /**
           * @throws DoesNotMatch 
           */
-        def execute(path: String): Any = ???
+        def execute(path: String): Any = {
+          val stack = threadLocalStack.get()
+          var stackSize = 0
+
+          var pathIndex = 0 
+          var pathLen   = path.length 
+
+          val instrLen = instructions.length 
+          var instrIndex = 0 
+          while (instrIndex < instrLen) {
+            val instr = instructions(instrIndex)
+
+            instr match {
+              case Instr.Literal(value) =>
+                val valueLength = value.length 
+
+                if (path.regionMatches(pathIndex, value, 0, valueLength)) {
+                  stack(stackSize) = () 
+                  stackSize += 1 
+                  pathIndex += valueLength
+                } else throw DoesNotMatch
+
+              case Instr.StringVar =>
+                val startIndex = pathIndex 
+                var endIndex   = path.indexOf("/", pathIndex)
+
+                if (endIndex == -1) endIndex = pathLen
+
+                pathIndex = endIndex
+
+                stack(stackSize) = path.substring(startIndex, endIndex)
+                stackSize += 1
+
+              case Instr.IntVar =>
+                val startIndex = pathIndex 
+                var endIndex   = path.indexOf("/", pathIndex)
+
+                if (endIndex == -1) endIndex = pathLen
+
+                pathIndex = endIndex
+
+                val segment = path.substring(startIndex, endIndex)
+
+                try { 
+                  stack(stackSize) = segment.toInt
+                } catch { 
+                  case _ : NumberFormatException => throw DoesNotMatch 
+                }
+
+                stackSize += 1
+
+              case Instr.Map1(f) =>
+                val first = stack(stackSize - 1)
+
+                stack(stackSize - 1) = f(first)
+
+              case Instr.Map2(f) =>
+                val first  = stack(stackSize - 2)
+                val second = stack(stackSize - 1)
+
+                stackSize -= 1
+
+                stack(stackSize - 1) = f(first, second)
+
+              case Instr.Pop =>
+                stackSize += 1
+            }
+
+            instrIndex += 1
+          }
+
+          stack(stackSize - 1)
+        }
       }
       private object Compiled {
         def fromRouteParser(parser: RouteParser[_]): Compiled = {
@@ -1155,7 +1240,24 @@ class StackInterpreterBenchmark {
               case CombineRight(left, right) => loop(left) ++ Chunk(Instr.Pop) ++ loop(right)
             }
 
-          Compiled(loop(parser).materialize)
+          val instructions = loop(parser).materialize
+
+          val maxStack = instructions.foldLeft((0, 0)) {
+            case ((curSize, maxSize), instr) => 
+              val nextSize: Int = instr match {
+                case Instr.Literal(_) => curSize + 1
+                case Instr.StringVar => curSize + 1 
+                case Instr.IntVar => curSize + 1 
+                case Instr.Map1(_) => curSize
+                case Instr.Map2(_) => curSize - 1
+                case Instr.Pop => curSize - 1
+              }
+
+              (nextSize, if (nextSize > maxSize) nextSize else maxSize)
+          }._2
+
+
+          Compiled(instructions, maxStack)
         }
       }
 
