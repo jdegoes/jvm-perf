@@ -15,6 +15,7 @@ import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 import scala.util.control.NoStackTrace
 import scala.reflect.ClassTag
+import scala.annotation.switch
 
 /**
  * EXERCISE 1
@@ -196,7 +197,7 @@ class UseArraysBenchmark {
 @BenchmarkMode(Array(Mode.Throughput))
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = Array())
+@Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
 @Threads(1)
 class NoAllocationBenchmark {
   private val rng = new scala.util.Random(0L)
@@ -353,6 +354,7 @@ class SpecializeBenchmark {
   var size: Int = _
 
   var genericTree: GenericTree[Int] = _
+  var intTree: IntTree               = _
 
   @Setup
   def setupGenericTree(): Unit = {
@@ -368,6 +370,22 @@ class SpecializeBenchmark {
     }
 
     genericTree = current
+  }
+
+  @Setup 
+  def setupIntTree(): Unit = {
+    val count = Math.sqrt(size).toInt
+
+    var current: IntTree =
+      IntTree.Branch(Array.fill(count)(IntTree.Leaf(0)))
+
+    var i = 0
+    while (i < count) {
+      current = IntTree.Branch(Array(current))
+      i = i + 1
+    }
+
+    intTree = current
   }
 
   @Benchmark
@@ -391,12 +409,35 @@ class SpecializeBenchmark {
   }
 
   @Benchmark
-  def intTree(blackhole: Blackhole): Unit = ()
+  def intTree(blackhole: Blackhole): Unit = {
+    def loop(tree: IntTree): Int =
+      if (tree.isInstanceOf[IntTree.Leaf]) {
+        tree.asInstanceOf[IntTree.Leaf].value
+      } else {
+        val children = tree.asInstanceOf[IntTree.Branch].children
+
+        var sum = 0
+        var i   = 0
+        while (i < children.length) {
+          sum = sum + loop(children(i))
+          i = i + 1
+        }
+        sum
+      }
+
+    blackhole.consume(loop(intTree))
+  }
 
   sealed trait GenericTree[A]
   object GenericTree {
     case class Leaf[A](value: A)                        extends GenericTree[A]
     case class Branch[A](children: Seq[GenericTree[A]]) extends GenericTree[A]
+  }
+
+  sealed trait IntTree
+  object IntTree {
+    case class Leaf(value: Int)               extends IntTree
+    case class Branch(children: Seq[IntTree]) extends IntTree
   }
 }
 
@@ -453,7 +494,18 @@ class NoPatternMatchingBenchmark {
   }
 
   @Benchmark
-  def isInstanceOf(blackhole: Blackhole): Unit = ()
+  def isInstanceOf(blackhole: Blackhole): Unit = {
+    var i      = 0
+    var lefts  = 0
+    var rights = 0
+    while (i < size) {
+      if (eithers(i).isInstanceOf[Left[_, _]]) lefts = lefts + eithers(i).asInstanceOf[Left[Int, Int]].value
+      else if (eithers(i).isInstanceOf[Right[_, _]]) rights = rights + eithers(i).asInstanceOf[Right[Int, Int]].value      
+
+      i = i + 1
+    }
+    blackhole.consume(lefts + rights)
+  }
 }
 
 /**
@@ -477,12 +529,18 @@ class NoPatternMatchingBenchmark {
 class PrimitivizeReturnBenchmark {
   case class Geolocation(precise: Boolean, lat: Int, long: Int)
 
+  type PackedGeolocation = Long
+
+  def geolocation(precise: Boolean, lat: Int, long: Int): PackedGeolocation = 
+    (if (precise) 1L else 0L) | (lat.toLong << 1) | (long.toLong << 33)
+
   @Benchmark
   def unpacked(blackhole: Blackhole): Unit =
     blackhole.consume(Geolocation(true, 1, 2))
 
   @Benchmark
-  def packed(blackhole: Blackhole): Unit = ()
+  def packed(blackhole: Blackhole): Unit = 
+    blackhole.consume(geolocation(true, 1, 2))
 }
 
 /**
@@ -513,11 +571,19 @@ class FlattenProductsBenchmark {
 
   var billings: Array[Billing] = _
 
+  var billingsStartDay: Array[Int] = _ 
+  var billingsEndDay: Array[Int] = _ 
+  var billingsDailyRate: Array[Double] = _ 
+
   @Setup
   def setup(): Unit = {
     val rng = new scala.util.Random(0L)
 
     billings = Array.ofDim(size)
+
+    billingsStartDay = Array.ofDim(size)
+    billingsEndDay = Array.ofDim(size)
+    billingsDailyRate = Array.ofDim(size)
   }
 
   @Benchmark
@@ -526,7 +592,6 @@ class FlattenProductsBenchmark {
     while (i < size) {
       val billing = Billing(0, 30, 300)
       billings(i) = billing
-      blackhole.consume(billing)
       i = i + 1
     }
     i = 0
@@ -540,7 +605,22 @@ class FlattenProductsBenchmark {
   }
 
   @Benchmark
-  def flattened(blackhole: Blackhole): Unit = ()
+  def flattened(blackhole: Blackhole): Unit = {
+    var i     = 0
+    while (i < size) {
+      billingsStartDay(i) = 0
+      billingsEndDay(i) = 30
+      billingsDailyRate(i) = 300
+      i = i + 1
+    }
+    i = 0
+    var total = 0.0
+    while (i < size) {
+      total = total + (billingsEndDay(i) - billingsStartDay(i)) * billingsDailyRate(i)
+      i = i + 1
+    }
+    blackhole.consume(total)
+  }
 }
 
 /**
@@ -570,19 +650,22 @@ class DevirtualizeBenchmark {
   var size: Int = _
 
   var virtual_ops: Array[Op] = _
+  var devirtual_ops: Array[Byte] = _  
 
   @Setup
   def setup(): Unit = {
     val rng = new scala.util.Random(0L)
 
-    virtual_ops = Array.fill(size)(rng.between(0, 6) match {
+    devirtual_ops = Array.fill(size)(rng.between(0, 6).toByte)
+
+    virtual_ops = devirtual_ops.map {
       case 0 => Op.Inc
       case 1 => Op.Dec
       case 2 => Op.Mul2
       case 3 => Op.Div2
       case 4 => Op.Neg
       case 5 => Op.Abs
-    })
+    }
   }
 
   @Benchmark
@@ -594,10 +677,27 @@ class DevirtualizeBenchmark {
       current = op.apply(current)
       i = i + 1
     }
+    blackhole.consume(current)
   }
 
   @Benchmark
-  def devirtualized(blackhole: Blackhole): Unit = ()
+  def devirtualized(blackhole: Blackhole): Unit = {
+    var current = 0
+    var i       = 0
+    while (i < size) {
+      val op = devirtual_ops(i)
+      current = (op: @switch) match {
+        case 0 => Op.Inc(current)
+        case 1 => Op.Dec(current)
+        case 2 => Op.Mul2(current)
+        case 3 => Op.Div2(current)
+        case 4 => Op.Neg(current)
+        case 5 => Op.Abs(current)
+      }
+      i = i + 1
+    }
+    blackhole.consume(current)
+  }
 
   trait Op  {
     def apply(x: Int): Int
@@ -654,8 +754,24 @@ class NoExceptionsBenchmark {
     override def getMessage(): String = message
   }
 
+  case class Exception2(message: String) extends Exception with NoStackTrace {
+    override def getMessage(): String = message
+  }
+
+  val exception3 = Exception2("message")
+
   def maybeException1(): Int = {
     if (rng.nextBoolean()) throw Exception1("message")
+    42
+  }
+
+  def maybeException2(): Int = {
+    if (rng.nextBoolean()) throw Exception2("message")
+    42
+  }
+
+  def maybeException3(): Int = {
+    if (rng.nextBoolean()) throw exception3
     42
   }
 
@@ -667,6 +783,32 @@ class NoExceptionsBenchmark {
         maybeException1()
       catch {
         case Exception1(message) => blackhole.consume(message)
+      }
+      i = i + 1
+    }
+  }
+
+  @Benchmark
+  def throwStacklessException(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      try
+        maybeException2()
+      catch {
+        case Exception2(message) => blackhole.consume(message)
+      }
+      i = i + 1
+    }
+  }
+
+  @Benchmark
+  def throwFixedException(blackhole: Blackhole): Unit = {
+    var i = 0
+    while (i < size) {
+      try
+        maybeException3()
+      catch {
+        case Exception2(message) => blackhole.consume(message)
       }
       i = i + 1
     }
@@ -926,6 +1068,106 @@ class StackInterpreterBenchmark {
         left.parse(path).flatMap { case (a, path) =>
           right.parse(path).map { case (b, path) => (f(a, b), path) }
         }
+    }
+  }
+
+  object opt {
+    sealed trait RouteParser[+A] {
+      import RouteParser._ 
+
+      private var _compiled: Compiled = null 
+
+      private def compiled: Compiled = {
+        if (_compiled eq null) {
+          _compiled = Compiled.fromRouteParser(this)
+        }
+
+        _compiled 
+      }
+
+      def parse(path: String): Option[A] = {
+        val c = compiled 
+
+        try {
+          Some(compiled.execute(path).asInstanceOf[A])
+        } catch {
+          case DoesNotMatch => None 
+        }
+      }
+
+      def <*[B](that: RouteParser[B]): RouteParser[A] =
+        this.zipLeft(that)
+
+      def *>[B](that: RouteParser[B]): RouteParser[B] =
+        this.zipRight(that)
+
+      def <*>[B](that: RouteParser[B]): RouteParser[(A, B)] =
+        this.zip(that)
+
+      def map[B](f: A => B): RouteParser[B] =
+        RouteParser.Map(this, f)
+
+      def zip[B](that: RouteParser[B]): RouteParser[(A, B)] =
+        this.zipWith(that)((_, _))
+
+      def zipLeft[B](that: RouteParser[B]): RouteParser[A] =
+        RouteParser.CombineLeft(this, that)
+
+      def zipRight[B](that: RouteParser[B]): RouteParser[B] =
+        RouteParser.CombineRight(this, that)
+
+      def zipWith[B, C](that: RouteParser[B])(f: (A, B) => C): RouteParser[C] =
+        RouteParser.Combine(this, that, f)
+    }
+    object RouteParser           {
+      case class Literal(value: String) extends RouteParser[Unit]
+      val Slash: RouteParser[Unit] = Literal("/")
+      case object StringVar extends RouteParser[String]
+      case object IntVar extends RouteParser[Int]
+      case class Map[A, B](parser: RouteParser[A], f: A => B) extends RouteParser[B]
+      case class Combine[A, B, C](left: RouteParser[A], right: RouteParser[B], f: (A, B) => C)
+          extends RouteParser[C]
+      case class CombineLeft[A, B](left: RouteParser[A], right: RouteParser[B])
+          extends RouteParser[A]
+      case class CombineRight[A, B](left: RouteParser[A], right: RouteParser[B])
+          extends RouteParser[B]
+
+      import zio.Chunk
+
+      case object DoesNotMatch extends Exception("The route does not match the specified pattern") with NoStackTrace
+
+      private case class Compiled(instructions: Chunk[Instr]) {
+        /**
+          * @throws DoesNotMatch 
+          */
+        def execute(path: String): Any = ???
+      }
+      private object Compiled {
+        def fromRouteParser(parser: RouteParser[_]): Compiled = {
+          def loop(parser: RouteParser[_]): Chunk[Instr] = 
+            parser match {
+              case Literal(value) => Chunk(Instr.Literal(value))
+              case StringVar => Chunk(Instr.StringVar)
+              case IntVar => Chunk(Instr.IntVar)
+              case Map(parser, f) => loop(parser) :+ Instr.Map1(f.asInstanceOf[Any => Any])
+              case Combine(left, right, f) => loop(left) ++ loop(right) :+ Instr.Map2(f.asInstanceOf[(Any, Any) => Any])
+              case CombineLeft(left, right) => loop(left) ++ loop(right) :+ Instr.Pop 
+              case CombineRight(left, right) => loop(left) ++ Chunk(Instr.Pop) ++ loop(right)
+            }
+
+          Compiled(loop(parser).materialize)
+        }
+      }
+
+      private sealed trait Instr
+      private object Instr {
+        case class Literal(value: String) extends Instr
+        case object StringVar extends Instr
+        case object IntVar extends Instr 
+        case class Map1(change: Any => Any) extends Instr
+        case class Map2(combine: (Any, Any) => Any) extends Instr
+        case object Pop extends Instr
+      }
     }
   }
 }
