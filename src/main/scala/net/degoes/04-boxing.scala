@@ -38,7 +38,7 @@ class BoxedBenchmark {
   var size: Int = _
 
   var boxed: Array[Boxed[Int]] = _
-  var unboxed: Array[Int] = _ 
+  var unboxed: Array[Int]      = _
 
   @Setup
   def setup(): Unit = {

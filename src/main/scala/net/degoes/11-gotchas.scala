@@ -27,9 +27,9 @@ import java.util.concurrent.TimeUnit
  *
  * EXERCISE 2
  *
- * Add the JVM options "-XX:-DoEscapeAnalysis", "-XX:-Inline" and re-run the benchmark. Now guess why
- * you see the behavior you are seeing, and come up with a modification to the benchmark that will
- * enable you to see the expected behavior (a modification that would accurately reflect some
+ * Add the JVM options "-XX:-DoEscapeAnalysis", "-XX:-Inline" and re-run the benchmark. Now guess
+ * why you see the behavior you are seeing, and come up with a modification to the benchmark that
+ * will enable you to see the expected behavior (a modification that would accurately reflect some
  * application code you might write).
  */
 @State(Scope.Thread)

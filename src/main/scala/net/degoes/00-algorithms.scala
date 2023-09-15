@@ -23,17 +23,17 @@ final case class Person(id: Int, age: Int, name: String, follows: Set[Int])
 
 final case class SocialNetwork(people: Vector[Person]) {
   def getFriendsOf(id: Int): Set[Int] = {
-    // n = number of people 
+    // n = number of people
     // m = max number of follows
 
     // Retrieve all the people that $id follows:
     val follows = people(id).follows
-    
+
     // Return only the people that follow $id back ("friends"):
-    follows.filter { candidateId => // m 
+    follows.filter { candidateId => // m
       val candidate = people(candidateId)
 
-      candidate.follows.contains(id) // m 
+      candidate.follows.contains(id) // m
     } // m
   }
 
@@ -46,19 +46,19 @@ final case class SocialNetwork(people: Vector[Person]) {
         (person.id, getFriendsOf(person.id).size)
       } // n
 
-    val mostPopular = personAndFriendCount.maxByOption(_._2) // n 
+    val mostPopular = personAndFriendCount.maxByOption(_._2) // n
 
-    // 2 * n 
+    // 2 * n
 
     mostPopular.map(_._1)
   }
 }
-object SocialNetwork                                {
+object SocialNetwork                                   {
   // Deterministic RNG:
   private val rng = new scala.util.Random(0L)
 
   def random(people: Int, friendsPerPerson: Int): SocialNetwork = {
-    val seq = 
+    val seq =
       (0 until people).map { id =>
         Person(
           id,
@@ -121,19 +121,18 @@ object SocialNetwork                                {
 @Threads(1)
 class FindMostPopularFriendBenchmark {
   @Param(Array("100", "1000", "10000"))
-  var networkSize: Int = _ 
+  var networkSize: Int = _
 
   @Param(Array("10", "100", "1000"))
-  var friendsPerPerson: Int = _ 
+  var friendsPerPerson: Int = _
 
-  var network: SocialNetwork = _ 
+  var network: SocialNetwork = _
 
-  @Setup 
-  def setup(): Unit = 
+  @Setup
+  def setup(): Unit =
     network = SocialNetwork.random(networkSize, friendsPerPerson)
 
   @Benchmark
-  def findMostPopularFriend(blackhole: Blackhole): Unit = {
+  def findMostPopularFriend(blackhole: Blackhole): Unit =
     blackhole.consume(network.findMostPopularFriend)
-  }
 }

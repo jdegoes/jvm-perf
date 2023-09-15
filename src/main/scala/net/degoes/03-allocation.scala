@@ -39,12 +39,11 @@ class AllocBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
 
-  var preallocated: Array[AnyRef] = _ 
+  var preallocated: Array[AnyRef] = _
 
   @Setup
-  def setup(): Unit = {
+  def setup(): Unit =
     preallocated = Array.fill(size)(new {})
-  }
 
   @Benchmark
   def alloc(blackhole: Blackhole): Unit = {
@@ -94,17 +93,16 @@ class CopyAllocBenchmark {
     people = Chunk.fromIterable(0 until size).map(Person(_))
 
   @Benchmark
-  def alloc(blackhole: Blackhole): Unit = {
+  def alloc(blackhole: Blackhole): Unit =
     blackhole.consume(people.map(p => p.copy(age = p.age + 1)))
-  }
 
-  @Benchmark 
+  @Benchmark
   def noAlloc(blackhole: Blackhole): Unit = {
-    var i = 0 
+    var i = 0
     while (i < people.length) {
       val person = people(i)
       person.age += 1
-      i = i + 1 
+      i = i + 1
     }
     blackhole.consume(people)
   }
@@ -168,21 +166,20 @@ class MarkSweepBenchmark {
 
   @Benchmark
   def markSweep(blackhole: Blackhole): Unit = {
-    def mark(root: Obj): Unit = {
-      if (root.marked) () 
+    def mark(root: Obj): Unit =
+      if (root.marked) ()
       else {
-        root.marked = true 
+        root.marked = true
 
         root.data.foreach {
-          case Data.Integer(_) => ()
+          case Data.Integer(_)     => ()
           case Data.Pointer(child) => mark(child)
         }
       }
-    }
 
     rootObjects.foreach(mark(_))
 
-    var i = 0 
+    var i   = 0
     val len = heap.objects.length
     while (i < len) {
       val obj = heap.objects(i)

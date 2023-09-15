@@ -54,9 +54,9 @@ class ElementPrependBenchmark {
   @Param(Array("1000", "10000", "100000"))
   var size: Int = _
 
-  var startList: List[String] = _
-  var startVector: Vector[String] = _ 
-  var startArray: Array[String] = _ 
+  var startList: List[String]     = _
+  var startVector: Vector[String] = _
+  var startArray: Array[String]   = _
 
   @Setup(Level.Trial)
   def setup(): Unit = {
@@ -86,15 +86,15 @@ class ElementPrependBenchmark {
 @Fork(1)
 @Threads(1)
 class ElementAppendBenchmark {
-  import zio.Chunk 
+  import zio.Chunk
 
   @Param(Array("1000", "10000", "100000"))
   var size: Int = _
 
-  var startList: List[String] = _
-  var startVector: Vector[String] = _ 
-  var startArray: Array[String] = _ 
-  var startChunk: Chunk[String] = _ 
+  var startList: List[String]     = _
+  var startVector: Vector[String] = _
+  var startArray: Array[String]   = _
+  var startChunk: Chunk[String]   = _
 
   @Setup(Level.Trial)
   def setup(): Unit = {
@@ -135,15 +135,15 @@ class ElementAppendBenchmark {
 @Fork(1)
 @Threads(1)
 class ConcatBenchmark {
-  import zio.Chunk 
+  import zio.Chunk
 
   @Param(Array("1000", "10000", "100000"))
   var size: Int = _
 
-  var startList: List[String] = _
-  var startVector: Vector[String] = _ 
-  var startArray: Array[String] = _ 
-  var startChunk: Chunk[String] = _ 
+  var startList: List[String]     = _
+  var startVector: Vector[String] = _
+  var startArray: Array[String]   = _
+  var startChunk: Chunk[String]   = _
 
   @Setup(Level.Trial)
   def setup(): Unit = {
@@ -154,19 +154,19 @@ class ConcatBenchmark {
   }
 
   @Benchmark
-  def list(blackhole: Blackhole): Unit = 
+  def list(blackhole: Blackhole): Unit =
     blackhole.consume(startList ++ startList)
 
   @Benchmark
-  def array(blackhole: Blackhole): Unit = 
+  def array(blackhole: Blackhole): Unit =
     blackhole.consume(startArray ++ startArray)
 
   @Benchmark
-  def vector(blackhole: Blackhole): Unit = 
+  def vector(blackhole: Blackhole): Unit =
     blackhole.consume(startVector ++ startVector)
 
   @Benchmark
-  def chunk(blackhole: Blackhole): Unit = 
+  def chunk(blackhole: Blackhole): Unit =
     blackhole.consume(startChunk ++ startChunk)
 }
 
@@ -184,15 +184,15 @@ class ConcatBenchmark {
 @Fork(1)
 @Threads(1)
 class RandomAccessBenchmark {
-  import zio.Chunk 
+  import zio.Chunk
 
   @Param(Array("10", "100", "1000"))
   var size: Int = _
 
-  var startList: List[String] = _
-  var startVector: Vector[String] = _ 
-  var startArray: Array[String] = _ 
-  var startChunk: Chunk[String] = _ 
+  var startList: List[String]     = _
+  var startVector: Vector[String] = _
+  var startArray: Array[String]   = _
+  var startChunk: Chunk[String]   = _
 
   @Setup(Level.Trial)
   def setup(): Unit = {
@@ -237,7 +237,7 @@ class RandomAccessBenchmark {
       i = i + 1
     }
   }
-    
+
 }
 
 /**
@@ -259,15 +259,15 @@ class RandomAccessBenchmark {
 @Fork(1)
 @Threads(1)
 class IterationBenchmark {
-  import zio.Chunk 
+  import zio.Chunk
 
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
 
-  var startList: List[String] = _
-  var startVector: Vector[String] = _ 
-  var startArray: Array[String] = _ 
-  var startChunk: Chunk[String] = _ 
+  var startList: List[String]     = _
+  var startVector: Vector[String] = _
+  var startArray: Array[String]   = _
+  var startChunk: Chunk[String]   = _
 
   @Setup(Level.Trial)
   def setup(): Unit = {
@@ -278,21 +278,20 @@ class IterationBenchmark {
   }
 
   @Benchmark
-  def listForeach(blackhole: Blackhole): Unit = 
+  def listForeach(blackhole: Blackhole): Unit =
     startList.foreach(blackhole.consume(_))
 
   @Benchmark
   def listIterator(blackhole: Blackhole): Unit = {
-    val iterator = startList.iterator 
+    val iterator = startList.iterator
 
-    while (iterator.hasNext) {
+    while (iterator.hasNext)
       blackhole.consume(iterator.next())
-    }
   }
 
   @Benchmark
   def array(blackhole: Blackhole): Unit = {
-    var i = 0 
+    var i = 0
     while (i < startArray.length) {
       blackhole.consume(startArray(i))
       i = i + 1
@@ -301,17 +300,16 @@ class IterationBenchmark {
 
   @Benchmark
   def vector(blackhole: Blackhole): Unit = {
-    var i = 0 
+    var i = 0
     while (i < startVector.length) {
       blackhole.consume(startVector(i))
       i = i + 1
     }
   }
-    
 
   @Benchmark
   def chunk(blackhole: Blackhole): Unit = {
-    var i = 0 
+    var i = 0
     while (i < startChunk.length) {
       blackhole.consume(startChunk(i))
       i = i + 1

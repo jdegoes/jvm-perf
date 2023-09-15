@@ -30,11 +30,11 @@ class ThrowExceptionBenchmark {
   case class MyException(message: String) extends Exception(message)
 
   @Benchmark
-  def throwCatchException(): Unit = 
-    try {
+  def throwCatchException(): Unit =
+    try
       throw MyException("Uh oh!")
-    } catch {
-      case _ : Throwable => ()
+    catch {
+      case _: Throwable => ()
     }
 
   @Benchmark
@@ -67,9 +67,9 @@ class ThrowSameExceptionBenchmark {
   catch { case _: Throwable => () }
 
   @Benchmark
-  def throwCatchSameException(): Unit = 
-    try throw exception 
-    catch { case _ : Throwable => () }
+  def throwCatchSameException(): Unit =
+    try throw exception
+    catch { case _: Throwable => () }
 }
 
 /**
@@ -102,11 +102,11 @@ class FillInStackTraceBenchmark {
   catch { case _: Throwable => () }
 }
 
-
 /**
  * EXERCISE 4
  *
- * Develop a benchmark to measure the overhead of try/catch distinct from the overhead of exceptions.
+ * Develop a benchmark to measure the overhead of try/catch distinct from the overhead of
+ * exceptions.
  */
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -119,21 +119,21 @@ class TryCatchOverheadBenchmark {
   sealed abstract class Bool(message: String) extends Exception(message)
   object Bool {
     case object False extends Bool("true")
-    case object True extends Bool("false")
+    case object True  extends Bool("false")
   }
 
   var bool: Bool = Bool.True
 
   @Benchmark
-  def tryCatch(blackhole: Blackhole): Unit = 
+  def tryCatch(blackhole: Blackhole): Unit =
     try throw bool
-    catch { 
-      case t : Throwable => blackhole.consume(t eq Bool.True)
+    catch {
+      case t: Throwable => blackhole.consume(t eq Bool.True)
     }
 
   @Benchmark
   def values(blackhole: Blackhole): Unit = {
-    val x = bool 
+    val x = bool
 
     blackhole.consume(x eq Bool.True)
   }

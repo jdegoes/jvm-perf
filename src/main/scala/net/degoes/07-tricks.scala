@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 import scala.util.control.NoStackTrace
 import scala.reflect.ClassTag
 import scala.annotation.switch
+import scala.annotation.tailrec
 
 /**
  * EXERCISE 1
@@ -63,9 +64,9 @@ class UseNullBenchmark {
 
   @Benchmark
   def scalaOption(blackhole: Blackhole): Unit = {
-    var i                         = 0
+    var i                       = 0
     var current: Option[String] = Some("a")
-    val cutoff                    = size - 10
+    val cutoff                  = size - 10
     while (i < size) {
       val some = Some("a")
       if (i > cutoff) current = None
@@ -81,7 +82,7 @@ class UseNullBenchmark {
     var current = "a"
     val cutoff  = size - 10
     while (i < size) {
-      if (i > cutoff) current = null 
+      if (i > cutoff) current = null
       else current = if (current ne null) current else "a"
       i = i + 1
     }
@@ -145,9 +146,9 @@ class UseArraysBenchmark {
 
   @Benchmark
   def array(blackhole: Blackhole): Unit = {
-    var i           = 0
-    var x1          = arr(0)
-    var x2          = arr(0)
+    var i  = 0
+    var x1 = arr(0)
+    var x2 = arr(0)
     while (i < size) {
       val x3 = arr(i)
 
@@ -160,19 +161,19 @@ class UseArraysBenchmark {
     blackhole.consume(arr)
   }
 
-  @annotation.tailrec 
-  final def buildList(n: Int, acc: List[Int]): List[Int] = 
-    if (n <= 0) acc 
+  @annotation.tailrec
+  final def buildList(n: Int, acc: List[Int]): List[Int] =
+    if (n <= 0) acc
     else buildList(n - 1, n :: acc)
 
   class ArrayPrepender[T: ClassTag](capacity: Int) {
     val array = Array.ofDim[T](capacity)
-    var size  = 0 
+    var size  = 0
 
     def apply(index: Int): T = array((size - 1) - index)
 
     def prepend(a: T): Unit = {
-      array(size) = a 
+      array(size) = a
       size += 1
     }
   }
@@ -207,8 +208,8 @@ class NoAllocationBenchmark {
   @Param(Array("1000", "10000"))
   var size: Int = _
 
-  var events: Array[Event] = _
-  var mutableMetrics: MutableMetricsMap = _ 
+  var events: Array[Event]              = _
+  var mutableMetrics: MutableMetricsMap = _
 
   @Setup
   def setup(): Unit = {
@@ -241,7 +242,7 @@ class NoAllocationBenchmark {
 
   @Benchmark
   def mutable(blackhole: Blackhole): Unit = {
-    var i       = 0
+    var i = 0
     while (i < size) {
       mutableMetrics.add(events(i))
       i = i + 1
@@ -262,26 +263,26 @@ class NoAllocationBenchmark {
 
   class MutableMetrics(var adViews: Int, var adClicks: Int, var adConversions: Int) {
     def aggregate(newAdViews: Int, newAdClicks: Int, newAdConversions: Int): Unit = {
-      adViews += newAdViews 
+      adViews += newAdViews
       adClicks += newAdClicks
       adConversions += newAdConversions
     }
   }
-  object MutableMetrics {
+  object MutableMetrics                                                             {
     def apply(): MutableMetrics = new MutableMetrics(0, 0, 0)
   }
-  class MutableMetricsMap(map: java.util.Map[UserId, MutableMetrics]) { self =>
-    def reserve(userId: UserId): MutableMetrics = {    
+  class MutableMetricsMap(map: java.util.Map[UserId, MutableMetrics])               { self =>
+    def reserve(userId: UserId): MutableMetrics = {
       var value: MutableMetrics = map.get(userId)
 
       if (value eq null) {
         value = MutableMetrics()
         map.put(userId, value)
       }
-      value 
+      value
     }
 
-    def add(event: Event): Unit = {      
+    def add(event: Event): Unit = {
       var value: MutableMetrics = reserve(event.userId)
 
       if (event.isInstanceOf[Event.AdView]) value.aggregate(1, 0, 0)
@@ -289,8 +290,8 @@ class NoAllocationBenchmark {
       else if (event.isInstanceOf[Event.AdConversion]) value.aggregate(0, 0, 1)
     }
   }
-  object MutableMetricsMap {
-    def apply(): MutableMetricsMap = 
+  object MutableMetricsMap                                                          {
+    def apply(): MutableMetricsMap =
       new MutableMetricsMap(new java.util.HashMap[UserId, MutableMetrics]())
   }
 
@@ -354,7 +355,7 @@ class SpecializeBenchmark {
   var size: Int = _
 
   var genericTree: GenericTree[Int] = _
-  var intTree: IntTree               = _
+  var intTree: IntTree              = _
 
   @Setup
   def setupGenericTree(): Unit = {
@@ -372,7 +373,7 @@ class SpecializeBenchmark {
     genericTree = current
   }
 
-  @Setup 
+  @Setup
   def setupIntTree(): Unit = {
     val count = Math.sqrt(size).toInt
 
@@ -499,8 +500,10 @@ class NoPatternMatchingBenchmark {
     var lefts  = 0
     var rights = 0
     while (i < size) {
-      if (eithers(i).isInstanceOf[Left[_, _]]) lefts = lefts + eithers(i).asInstanceOf[Left[Int, Int]].value
-      else if (eithers(i).isInstanceOf[Right[_, _]]) rights = rights + eithers(i).asInstanceOf[Right[Int, Int]].value      
+      if (eithers(i).isInstanceOf[Left[_, _]])
+        lefts = lefts + eithers(i).asInstanceOf[Left[Int, Int]].value
+      else if (eithers(i).isInstanceOf[Right[_, _]])
+        rights = rights + eithers(i).asInstanceOf[Right[Int, Int]].value
 
       i = i + 1
     }
@@ -531,7 +534,7 @@ class PrimitivizeReturnBenchmark {
 
   type PackedGeolocation = Long
 
-  def geolocation(precise: Boolean, lat: Int, long: Int): PackedGeolocation = 
+  def geolocation(precise: Boolean, lat: Int, long: Int): PackedGeolocation =
     (if (precise) 1L else 0L) | (lat.toLong << 1) | (long.toLong << 33)
 
   @Benchmark
@@ -539,7 +542,7 @@ class PrimitivizeReturnBenchmark {
     blackhole.consume(Geolocation(true, 1, 2))
 
   @Benchmark
-  def packed(blackhole: Blackhole): Unit = 
+  def packed(blackhole: Blackhole): Unit =
     blackhole.consume(geolocation(true, 1, 2))
 }
 
@@ -571,9 +574,9 @@ class FlattenProductsBenchmark {
 
   var billings: Array[Billing] = _
 
-  var billingsStartDay: Array[Int] = _ 
-  var billingsEndDay: Array[Int] = _ 
-  var billingsDailyRate: Array[Double] = _ 
+  var billingsStartDay: Array[Int]     = _
+  var billingsEndDay: Array[Int]       = _
+  var billingsDailyRate: Array[Double] = _
 
   @Setup
   def setup(): Unit = {
@@ -649,8 +652,8 @@ class DevirtualizeBenchmark {
   @Param(Array("10000", "100000"))
   var size: Int = _
 
-  var virtual_ops: Array[Op] = _
-  var devirtual_ops: Array[Byte] = _  
+  var virtual_ops: Array[Op]     = _
+  var devirtual_ops: Array[Byte] = _
 
   @Setup
   def setup(): Unit = {
@@ -817,15 +820,15 @@ class NoExceptionsBenchmark {
 }
 
 /**
-  * EXERCISE 11
-  * 
-  * Hash maps can offer quite high performance (O(1)), but never as high performance as array 
-  * lookups (lower constant factor). To accelerate some code, you can switch from using non-integer
-  * sparse keys to using dense integer keys, which lets you replace the map with an array.
-  *
-  * In this exercise, create an equivalent implementation to the provided one that uses arrays
-  * instead of maps and observe the effects on performance.
-  */
+ * EXERCISE 11
+ *
+ * Hash maps can offer quite high performance (O(1)), but never as high performance as array lookups
+ * (lower constant factor). To accelerate some code, you can switch from using non-integer sparse
+ * keys to using dense integer keys, which lets you replace the map with an array.
+ *
+ * In this exercise, create an equivalent implementation to the provided one that uses arrays
+ * instead of maps and observe the effects on performance.
+ */
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
@@ -834,30 +837,30 @@ class NoExceptionsBenchmark {
 @Fork(value = 1, jvmArgsAppend = Array())
 @Threads(1)
 class MapToArrayBenchmark {
-  import zio.Chunk 
+  import zio.Chunk
 
   @Param(Array("10000", "100000"))
-  var size: Int = _ 
+  var size: Int = _
 
   val rng = new scala.util.Random(0L)
 
-  var allData: Chunk[Data] = _ 
-  val transformation = 
+  var allData: Chunk[Data] = _
+  val transformation       =
     Transformation(
       Map(
-        Component.Email -> Operation.Identity,
-        Component.Name -> Operation.Identity,
-        Component.Phone -> Operation.Identity,
-        Component.Age -> Operation.Identity,
-        Component.Zip -> Operation.Identity,
-        Component.City -> Operation.Identity,
-        Component.State -> Operation.Identity,
+        Component.Email   -> Operation.Identity,
+        Component.Name    -> Operation.Identity,
+        Component.Phone   -> Operation.Identity,
+        Component.Age     -> Operation.Identity,
+        Component.Zip     -> Operation.Identity,
+        Component.City    -> Operation.Identity,
+        Component.State   -> Operation.Identity,
         Component.Country -> Operation.Identity
       )
     )
 
-  @Setup 
-  def setup(): Unit = {
+  @Setup
+  def setup(): Unit =
     allData = Chunk.fill(size) {
       Data(
         email = rng.nextString(10),
@@ -870,7 +873,6 @@ class MapToArrayBenchmark {
         country = rng.nextString(10)
       )
     }
-  }
 
   @Benchmark
   def map(blackhole: Blackhole): Unit = {
@@ -882,29 +884,28 @@ class MapToArrayBenchmark {
     }
   }
 
-  def transformData(data: Data, transformation: Transformation): Unit = {
+  def transformData(data: Data, transformation: Transformation): Unit =
     transformation.map.foreach { case (component, operation) =>
       component match {
-        case Component.Email => 
+        case Component.Email   =>
           data.email = operation(data.email)
-        case Component.Name =>
+        case Component.Name    =>
           data.name = operation(data.name)
-        case Component.Phone =>
+        case Component.Phone   =>
           data.phone = operation(data.phone)
-        case Component.Age =>
+        case Component.Age     =>
           data.age = operation(data.age)
-        case Component.Zip =>
+        case Component.Zip     =>
           data.zip = operation(data.zip)
-        case Component.City =>
+        case Component.City    =>
           data.city = operation(data.city)
-        case Component.State =>
+        case Component.State   =>
           data.state = operation(data.state)
         case Component.Country =>
           data.country = operation(data.country)
-        case _ => () 
+        case _                 => ()
       }
     }
-  }
   case class Data(
     var email: String,
     var name: String,
@@ -929,40 +930,39 @@ class MapToArrayBenchmark {
       Component.Country
     )
 
-    val Email = Component("email")
-    val Name  = Component("name")
-    val Phone = Component("phone")
-    val Age   = Component("age")
-    val Zip   = Component("zip")
-    val City  = Component("city")
-    val State = Component("state")
+    val Email   = Component("email")
+    val Name    = Component("name")
+    val Phone   = Component("phone")
+    val Age     = Component("age")
+    val Zip     = Component("zip")
+    val City    = Component("city")
+    val State   = Component("state")
     val Country = Component("country")
   }
   sealed trait Operation {
-    def apply(value: String): String = 
+    def apply(value: String): String =
       this match {
-        case Operation.Identity => 
-          value 
-        case Operation.Anonymize(full) => 
+        case Operation.Identity               =>
+          value
+        case Operation.Anonymize(full)        =>
           if (full) "*****"
           else value.take(3) + "*****"
-        case Operation.Encrypt(key) => 
+        case Operation.Encrypt(key)           =>
           value.map(c => (c ^ key.hashCode).toChar)
-        case Operation.Uppercase => 
+        case Operation.Uppercase              =>
           value.toUpperCase
-        case Operation.Composite(left, right) => 
+        case Operation.Composite(left, right) =>
           right(left(value))
       }
   }
   object Operation {
-    case object Identity extends Operation
-    case class Anonymize(full: Boolean) extends Operation 
-    case class Encrypt(key: String) extends Operation 
-    case object Uppercase extends Operation
+    case object Identity                                    extends Operation
+    case class Anonymize(full: Boolean)                     extends Operation
+    case class Encrypt(key: String)                         extends Operation
+    case object Uppercase                                   extends Operation
     case class Composite(left: Operation, right: Operation) extends Operation
   }
 }
-
 
 /**
  * GRADUATION PROJECT
@@ -981,7 +981,7 @@ class MapToArrayBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class StackInterpreterBenchmark {
   import RouteParser._
 
@@ -990,17 +990,20 @@ class StackInterpreterBenchmark {
     Slash *> Literal("users") *> Slash *> StringVar <* Slash <* Literal("posts") <* Slash <*> IntVar
 
   val parserOpt: opt.RouteParser[(String, Int)] = {
-    import opt.RouteParser._ 
+    import opt.RouteParser._
 
     Slash *> Literal("users") *> Slash *> StringVar <* Slash <* Literal("posts") <* Slash <*> IntVar
   }
+
+  @Setup
+  def setup(): Unit = parserOpt.precompile()
 
   @Benchmark
   def classic(blackhole: Blackhole): Unit =
     blackhole.consume(parser.parse("/users/jdegoes/posts/123"))
 
   @Benchmark
-  def interpreted(blackhole: Blackhole): Unit = 
+  def interpreted(blackhole: Blackhole): Unit =
     blackhole.consume(parserOpt.parse("/users/jdegoes/posts/123"))
 
   sealed trait RouteParser[+A] {
@@ -1080,25 +1083,28 @@ class StackInterpreterBenchmark {
 
   object opt {
     sealed trait RouteParser[+A] {
-      import RouteParser._ 
+      import RouteParser._
 
-      private var _compiled: Compiled = null 
+      private var _compiled: Compiled = null
 
       private def compiled: Compiled = {
+        precompile()
+
+        _compiled
+      }
+
+      def precompile(): Unit =
         if (_compiled eq null) {
           _compiled = Compiled.fromRouteParser(this)
         }
 
-        _compiled 
-      }
-
       def parse(path: String): Option[A] = {
-        val c = compiled 
+        val c = compiled
 
-        try {
+        try
           Some(compiled.execute(path).asInstanceOf[A])
-        } catch {
-          case DoesNotMatch => None 
+        catch {
+          case DoesNotMatch => None
         }
       }
 
@@ -1129,8 +1135,8 @@ class StackInterpreterBenchmark {
     object RouteParser           {
       case class Literal(value: String) extends RouteParser[Unit]
       val Slash: RouteParser[Unit] = Literal("/")
-      case object StringVar extends RouteParser[String]
-      case object IntVar extends RouteParser[Int]
+      case object StringVar                                   extends RouteParser[String]
+      case object IntVar                                      extends RouteParser[Int]
       case class Map[A, B](parser: RouteParser[A], f: A => B) extends RouteParser[B]
       case class Combine[A, B, C](left: RouteParser[A], right: RouteParser[B], f: (A, B) => C)
           extends RouteParser[C]
@@ -1141,42 +1147,51 @@ class StackInterpreterBenchmark {
 
       import zio.Chunk
 
-      case object DoesNotMatch extends Exception("The route does not match the specified pattern") with NoStackTrace
+      case object DoesNotMatch
+          extends Exception("The route does not match the specified pattern")
+          with NoStackTrace
 
       private case class Compiled(instructions: Chunk[Instr], maxStack: Int) {
-        private val threadLocalStack: ThreadLocal[Array[Any]] = 
+        private val threadLocalStack: ThreadLocal[Array[Any]] =
           new ThreadLocal[Array[Any]] {
-            override def initialValue(): Array[Any] = 
+            override def initialValue(): Array[Any] =
               Array.ofDim[Any](maxStack)
           }
 
         /**
-          * @throws DoesNotMatch 
-          */
+         * @throws DoesNotMatch
+         */
         def execute(path: String): Any = {
-          val stack = threadLocalStack.get()
+          val stack     = threadLocalStack.get()
           var stackSize = 0
 
-          var pathIndex = 0 
-          var pathLen   = path.length 
+          var pathIndex = 0
+          var pathLen   = path.length
 
-          val instrLen = instructions.length 
-          var instrIndex = 0 
+          val instrLen   = instructions.length
+          var instrIndex = 0
           while (instrIndex < instrLen) {
             val instr = instructions(instrIndex)
 
             instr match {
               case Instr.Literal(value) =>
-                val valueLength = value.length 
+                val valueLength = value.length
 
                 if (path.regionMatches(pathIndex, value, 0, valueLength)) {
-                  stack(stackSize) = () 
-                  stackSize += 1 
+                  stack(stackSize) = ()
+                  stackSize += 1
+                  pathIndex += valueLength
+                } else throw DoesNotMatch
+
+              case Instr.LiteralPop(value) =>
+                val valueLength = value.length
+
+                if (path.regionMatches(pathIndex, value, 0, valueLength)) {
                   pathIndex += valueLength
                 } else throw DoesNotMatch
 
               case Instr.StringVar =>
-                val startIndex = pathIndex 
+                val startIndex = pathIndex
                 var endIndex   = path.indexOf("/", pathIndex)
 
                 if (endIndex == -1) endIndex = pathLen
@@ -1187,7 +1202,7 @@ class StackInterpreterBenchmark {
                 stackSize += 1
 
               case Instr.IntVar =>
-                val startIndex = pathIndex 
+                val startIndex = pathIndex
                 var endIndex   = path.indexOf("/", pathIndex)
 
                 if (endIndex == -1) endIndex = pathLen
@@ -1196,10 +1211,10 @@ class StackInterpreterBenchmark {
 
                 val segment = path.substring(startIndex, endIndex)
 
-                try { 
+                try
                   stack(stackSize) = segment.toInt
-                } catch { 
-                  case _ : NumberFormatException => throw DoesNotMatch 
+                catch {
+                  case _: NumberFormatException => throw DoesNotMatch
                 }
 
                 stackSize += 1
@@ -1227,48 +1242,101 @@ class StackInterpreterBenchmark {
           stack(stackSize - 1)
         }
       }
-      private object Compiled {
+      private object Compiled                                                {
         def fromRouteParser(parser: RouteParser[_]): Compiled = {
-          def loop(parser: RouteParser[_]): Chunk[Instr] = 
+          def fuseLiterals(list: List[Instr]): List[Instr] = {
+            import Instr._
+
+            list match {
+              case Instr.Literal(left) :: Pop :: Instr.Literal(right) :: tail =>
+                fuseLiterals(Instr.Literal(left + right) :: tail)
+
+              case head :: tail => head :: fuseLiterals(tail)
+
+              case Nil => Nil
+            }
+          }
+
+          def literalPop(list: List[Instr]): List[Instr] = {
+            import Instr._
+
+            list match {
+              case Instr.Literal(value) :: Pop :: tail =>
+                Instr.LiteralPop(value) :: literalPop(tail)
+
+              case head :: tail => head :: literalPop(tail)
+
+              case Nil => Nil
+            }
+          }
+
+          def optimize(list: List[Instr]): List[Instr] =
+            literalPop(fuseLiterals(list))
+
+          @tailrec
+          def fullyOptimize(list: List[Instr]): List[Instr] = {
+            val opt = optimize(list)
+
+            if (opt != list) fullyOptimize(opt)
+            else opt
+          }
+
+          def loop(parser: RouteParser[_]): Chunk[Instr] =
             parser match {
-              case Literal(value) => Chunk(Instr.Literal(value))
-              case StringVar => Chunk(Instr.StringVar)
-              case IntVar => Chunk(Instr.IntVar)
-              case Map(parser, f) => loop(parser) :+ Instr.Map1(f.asInstanceOf[Any => Any])
-              case Combine(left, right, f) => loop(left) ++ loop(right) :+ Instr.Map2(f.asInstanceOf[(Any, Any) => Any])
-              case CombineLeft(left, right) => loop(left) ++ loop(right) :+ Instr.Pop 
+              case Literal(value)            => Chunk(Instr.Literal(value))
+              case StringVar                 => Chunk(Instr.StringVar)
+              case IntVar                    => Chunk(Instr.IntVar)
+              case Map(parser, f)            => loop(parser) :+ Instr.Map1(f.asInstanceOf[Any => Any])
+              case Combine(left, right, f)   =>
+                loop(left) ++ loop(right) :+ Instr.Map2(f.asInstanceOf[(Any, Any) => Any])
+              case CombineLeft(left, right)  => loop(left) ++ loop(right) :+ Instr.Pop
               case CombineRight(left, right) => loop(left) ++ Chunk(Instr.Pop) ++ loop(right)
             }
 
-          val instructions = loop(parser).materialize
+          val instructions = Chunk.fromIterable(fullyOptimize(loop(parser).toList))
 
-          val maxStack = instructions.foldLeft((0, 0)) {
-            case ((curSize, maxSize), instr) => 
+          println("****************")
+          println(instructions.mkString("\n"))
+          println("****************")
+
+          val maxStack = instructions
+            .foldLeft((0, 0)) { case ((curSize, maxSize), instr) =>
               val nextSize: Int = instr match {
-                case Instr.Literal(_) => curSize + 1
-                case Instr.StringVar => curSize + 1 
-                case Instr.IntVar => curSize + 1 
-                case Instr.Map1(_) => curSize
-                case Instr.Map2(_) => curSize - 1
-                case Instr.Pop => curSize - 1
+                case Instr.Literal(_)    => curSize + 1
+                case Instr.LiteralPop(_) => curSize
+                case Instr.StringVar     => curSize + 1
+                case Instr.IntVar        => curSize + 1
+                case Instr.Map1(_)       => curSize
+                case Instr.Map2(_)       => curSize - 1
+                case Instr.Pop           => curSize - 1
               }
 
               (nextSize, if (nextSize > maxSize) nextSize else maxSize)
-          }._2
-
+            }
+            ._2
 
           Compiled(instructions, maxStack)
         }
       }
 
-      private sealed trait Instr
+      private object Tags  {
+        final val Literal    = 0
+        final val LiteralPop = 1
+        final val StringVar  = 2
+        final val IntVar     = 3
+        final val Map1       = 4
+        final val Map2       = 5
+        final val Pop        = 6
+      }
+      private abstract class Instr
       private object Instr {
-        case class Literal(value: String) extends Instr
-        case object StringVar extends Instr
-        case object IntVar extends Instr 
-        case class Map1(change: Any => Any) extends Instr
+        case class Literal(value: String)           extends Instr
+        case class LiteralPop(value: String)        extends Instr
+        case object StringVar                       extends Instr
+        case object IntVar                          extends Instr
+        case class Map1(change: Any => Any)         extends Instr
         case class Map2(combine: (Any, Any) => Any) extends Instr
-        case object Pop extends Instr
+        case object Pop                             extends Instr
       }
     }
   }

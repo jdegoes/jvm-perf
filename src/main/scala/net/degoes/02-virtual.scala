@@ -155,8 +155,8 @@ class PolySimBenchmark {
   def invokeStatic(blackhole: Blackhole): Unit =
     blackhole.consume(is.address.value)
 
-  @Benchmark 
-  def invokeDynamic(blackhole: Blackhole): Unit = 
+  @Benchmark
+  def invokeDynamic(blackhole: Blackhole): Unit =
     blackhole.consume(obj.meta.vtable(iv.method).value)
 
   case class JVMObject(data: Any, meta: JVMClassMetadata)

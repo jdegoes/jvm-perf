@@ -149,7 +149,7 @@ class Estimation2Benchmark {
   }
 
   trait Incrementer {
-    def increment(int: Int): Int 
+    def increment(int: Int): Int
   }
 
   val IntIncrementer: Incrementer = (x: Int) => x + 1
@@ -227,9 +227,9 @@ class Estimation3Benchmark {
   @Benchmark
   def checkInt3(blackhole: Blackhole): Unit = {
     def isInt(s: String): Boolean = {
-      var i = 0
+      var i   = 0
       val len = s.length
-      while(i < len) {
+      while (i < len) {
         if (!s.charAt(i).isDigit) return false
         i += 1
       }
