@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class TuningBenchmark1 {
   @Param(Array("10000", "1000000"))
   var size: Int = _
@@ -59,7 +59,7 @@ class TuningBenchmark1 {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class TuningBenchmark2 {
   @Param(Array("8000000"))
   var size: Int = _
@@ -75,7 +75,7 @@ class TuningBenchmark2 {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class TuningBenchmark3 {
   @Param(Array("4000"))
   var size: Int = _
@@ -91,7 +91,7 @@ class TuningBenchmark3 {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class TuningBenchmark4 {
   @Param(Array("2", "4", "8"))
   var n: Int = _

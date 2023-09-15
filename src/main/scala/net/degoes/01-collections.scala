@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class ElementPrependBenchmark {
   val PrependsPerIteration = 100
 
@@ -77,7 +77,7 @@ class ElementPrependBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class ConcatBenchmark {
   @Setup(Level.Trial)
   def setup(): Unit = ()
@@ -98,7 +98,7 @@ class ConcatBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class RandomAccessBenchmark {
   @Setup(Level.Trial)
   def setup(): Unit = ()
@@ -124,7 +124,7 @@ class RandomAccessBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class IterationBenchmark {
   @Setup(Level.Trial)
   def setup(): Unit = ()
@@ -145,7 +145,7 @@ class IterationBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class LookupBenchmark {
   val Size       = 1000
   val IdToLookup = Size - 1
@@ -177,7 +177,7 @@ class LookupBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class GraduationBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _

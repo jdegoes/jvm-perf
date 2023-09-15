@@ -107,7 +107,7 @@ object dataset1 {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class ProjectBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _

@@ -34,7 +34,7 @@ import zio.Chunk
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class AllocBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
@@ -69,7 +69,7 @@ class AllocBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class CopyAllocBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
@@ -105,7 +105,7 @@ class CopyAllocBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class MarkSweepBenchmark {
   val rng = new scala.util.Random(0L)
 

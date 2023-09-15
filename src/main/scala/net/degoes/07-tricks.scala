@@ -32,7 +32,7 @@ import scala.util.control.NoStackTrace
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class UseNullBenchmark {
   @Param(Array("10000", "1000000"))
   var size: Int = _
@@ -80,7 +80,7 @@ class UseNullBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class UseArraysBenchmark {
   private val rng = new scala.util.Random(0L)
 
@@ -137,7 +137,7 @@ class UseArraysBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class NoAllocationBenchmark {
   private val rng = new scala.util.Random(0L)
 
@@ -241,7 +241,7 @@ class NoAllocationBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class SpecializeBenchmark {
   @Param(Array("10000", "100000"))
   var size: Int = _
@@ -313,7 +313,7 @@ class SpecializeBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class NoPatternMatchingBenchmark {
   val rng = new scala.util.Random(0L)
 
@@ -367,7 +367,7 @@ class NoPatternMatchingBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-Inline", "-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class PrimitivizeReturnBenchmark {
   case class Geolocation(precise: Boolean, lat: Int, long: Int)
 
@@ -396,7 +396,7 @@ class PrimitivizeReturnBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class FlattenProductsBenchmark {
   val rng = new scala.util.Random(0L)
 
@@ -456,7 +456,7 @@ class FlattenProductsBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class DevirtualizeBenchmark {
   val rng = new scala.util.Random(0L)
 
@@ -537,7 +537,7 @@ class DevirtualizeBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class NoExceptionsBenchmark {
   val rng = new scala.util.Random(0L)
 
@@ -584,7 +584,7 @@ class NoExceptionsBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class MapToArrayBenchmark {
   import zio.Chunk 
 
@@ -733,7 +733,7 @@ class MapToArrayBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis"))
-@Threads(1)
+@Threads(16)
 class StackInterpreterBenchmark {
   import RouteParser._
 

@@ -47,7 +47,7 @@ import zio.Chunk
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class PolyBenchmark {
   @Param(Array("1000", "10000", "100000"))
   var size: Int = _
@@ -126,7 +126,7 @@ class PolyBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class PolySimBenchmark {
   val obj: JVMObject             =
     JVMObject(1, JVMClassMetadata("Dog", Map(JVMMethod("Dog", "bark") -> Address(0))))

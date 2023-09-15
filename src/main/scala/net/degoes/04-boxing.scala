@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class BoxedBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
@@ -78,7 +78,7 @@ class BoxedBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class BoxedComparatorBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _

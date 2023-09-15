@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(1)
-@Threads(1)
+@Threads(16)
 class JmhExample {
 
   @Benchmark

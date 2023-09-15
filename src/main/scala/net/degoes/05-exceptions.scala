@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class ThrowExceptionBenchmark {
   case class MyException(message: String) extends Exception(message)
 
@@ -49,7 +49,7 @@ class ThrowExceptionBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class ThrowSameExceptionBenchmark {
   case class MyException(message: String) extends Exception(message)
 
@@ -76,7 +76,7 @@ class ThrowSameExceptionBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class FillInStackTraceBenchmark {
   case class MyException(message: String) extends Exception(message)
 

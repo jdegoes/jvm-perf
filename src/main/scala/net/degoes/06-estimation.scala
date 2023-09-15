@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class Estimation1Benchmark {
   @Param(Array("1000", "10000"))
   var size: Int = _
@@ -83,7 +83,7 @@ class Estimation1Benchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
-@Threads(1)
+@Threads(16)
 class Estimation2Benchmark {
   @Param(Array("1000", "10000"))
   var size: Int = _
@@ -159,7 +159,7 @@ class Estimation2Benchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
-@Threads(1)
+@Threads(16)
 class Estimation3Benchmark {
   val rng = new scala.util.Random(0L)
 
@@ -223,7 +223,7 @@ class Estimation3Benchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
-@Threads(1)
+@Threads(16)
 class Estimation4Benchmark {
   @Param(Array("1000", "10000"))
   var size: Int = _

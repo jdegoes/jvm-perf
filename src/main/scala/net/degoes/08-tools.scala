@@ -27,7 +27,7 @@ import java.util.ArrayList
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class PrintCompilationBenchmark {
   @Param(Array("10", "20"))
   var depth: Int = _
@@ -54,7 +54,7 @@ class PrintCompilationBenchmark {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array())
-@Threads(1)
+@Threads(16)
 class PrintInliningBenchmark {
   @Param(Array("100", "1000", "10000"))
   var size: Int = _
@@ -147,7 +147,7 @@ object ProfilerExample {
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, jvmArgsAppend = Array("-XX:-DoEscapeAnalysis", "-XX:-Inline"))
-@Threads(1)
+@Threads(16)
 class JavapBenchmark {
   val rng = new scala.util.Random(0L)
 
