@@ -37,7 +37,7 @@ n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    
 n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    N/A       N/A  N/A     1000  thrpt    5         452.260 ±          4.475  ops/ms  [scala]
 n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    N/A       N/A  N/A     1000  thrpt    5         634.180 ±         16.675  ops/ms  [kotlin]
 
-n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    N/A       N/A  N/A    10000  thrpt    5          36.482 ±          0.552  ops/ms  [scala]   # slower
+n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    N/A       N/A  N/A    10000  thrpt    5          36.482 ±          0.552  ops/ms  [scala]
 n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    N/A       N/A  N/A    10000  thrpt    5          52.348 ±          1.401  ops/ms  [kotlin]
 n.d.allocation.CopyAllocBenchmark.alloc                                  N/A    N/A       N/A  N/A    10000  thrpt    5          56.820 ±          4.779  ops/ms  [java]
 
@@ -79,15 +79,15 @@ n.d.boxing.BoxedBenchmark.unboxed                                        N/A    
 
 n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A      100  thrpt    5       86577.602 ±        584.833  ops/ms  [scala]
 n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A      100  thrpt    5       87013.563 ±        789.755  ops/ms  [java]
-n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A      100  thrpt    5      114778.661 ±        810.875  ops/ms  [kotlin]  # faster
+n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A      100  thrpt    5      114778.661 ±        810.875  ops/ms  [kotlin]
 
 n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A     1000  thrpt    5        1643.077 ±         18.279  ops/ms  [scala]
 n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A     1000  thrpt    5        1782.527 ±        358.045  ops/ms  [java]
-n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A     1000  thrpt    5       13057.063 ±         82.819  ops/ms  [kotlin]  # faster
+n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A     1000  thrpt    5       13057.063 ±         82.819  ops/ms  [kotlin]
 
 n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A    10000  thrpt    5         143.323 ±         33.840  ops/ms  [java]
 n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A    10000  thrpt    5         160.887 ±          2.106  ops/ms  [scala]
-n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A    10000  thrpt    5        1301.303 ±         12.492  ops/ms  [kotlin]  # faster
+n.d.boxing.BoxedComparatorBenchmark.boxed                                N/A    N/A       N/A  N/A    10000  thrpt    5        1301.303 ±         12.492  ops/ms  [kotlin]
 
 n.d.collections.ConcatBenchmark.list                                     N/A    N/A       N/A  N/A      N/A  thrpt    5     7748333.349 ±     841188.951  ops/ms  [java]
 n.d.collections.ConcatBenchmark.list                                     N/A    N/A       N/A  N/A      N/A  thrpt    5     9011745.895 ±      33907.871  ops/ms  [scala]
@@ -137,19 +137,19 @@ n.d.estimation.Estimation1Benchmark.array                                N/A    
 n.d.estimation.Estimation1Benchmark.array                                N/A    N/A       N/A  N/A    10000  thrpt    5      741649.755 ±      64360.600   ops/s  [java]
 n.d.estimation.Estimation1Benchmark.array                                N/A    N/A       N/A  N/A    10000  thrpt    5      791585.145 ±      17098.990   ops/s  [kotlin]
 
-n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A     1000  thrpt    5     1559168.419 ±      24518.881   ops/s  [scala]   # slower
+n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A     1000  thrpt    5     1559168.419 ±      24518.881   ops/s  [scala]
 n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A     1000  thrpt    5     2670566.749 ±     114707.747   ops/s  [java]
 n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A     1000  thrpt    5     2743900.327 ±      49446.506   ops/s  [kotlin]
 
 n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A    10000  thrpt    5      130455.334 ±        578.323   ops/s  [kotlin]
 n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A    10000  thrpt    5      155725.623 ±       1593.983   ops/s  [scala]
-n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A    10000  thrpt    5      230593.197 ±      35284.001   ops/s  [java]    # faster
+n.d.estimation.Estimation1Benchmark.list                                 N/A    N/A       N/A  N/A    10000  thrpt    5      230593.197 ±      35284.001   ops/s  [java]
 
-n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A     1000  thrpt    5       75015.753 ±       1405.048   ops/s  [scala]   # slower
+n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A     1000  thrpt    5       75015.753 ±       1405.048   ops/s  [scala]
 n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A     1000  thrpt    5      137123.030 ±      25479.311   ops/s  [java]
 n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A     1000  thrpt    5      138846.816 ±       1848.779   ops/s  [kotlin]
 
-n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A    10000  thrpt    5        7209.137 ±         69.668   ops/s  [scala]   # slower
+n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A    10000  thrpt    5        7209.137 ±         69.668   ops/s  [scala]
 n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A    10000  thrpt    5       13996.565 ±        402.985   ops/s  [java]
 n.d.estimation.Estimation2Benchmark.array_boxing                         N/A    N/A       N/A  N/A    10000  thrpt    5       14187.133 ±         60.864   ops/s  [kotlin]
 
@@ -343,17 +343,17 @@ n.d.tricks.FlattenProductsBenchmark.unflattened                          N/A    
 n.d.tricks.FlattenProductsBenchmark.unflattened                          N/A    N/A       N/A  N/A   100000  thrpt    5        2370.255 ±         41.876   ops/s  [scala]
 n.d.tricks.FlattenProductsBenchmark.unflattened                          N/A    N/A       N/A  N/A   100000  thrpt    5        2388.061 ±         20.919   ops/s  [kotlin]
 
-n.d.tricks.MapToArrayBenchmark.map                                       N/A    N/A       N/A  N/A    10000  thrpt    5        1732.515 ±         39.021   ops/s  [java]    # slower
+n.d.tricks.MapToArrayBenchmark.map                                       N/A    N/A       N/A  N/A    10000  thrpt    5        1732.515 ±         39.021   ops/s  [java]
 n.d.tricks.MapToArrayBenchmark.map                                       N/A    N/A       N/A  N/A    10000  thrpt    5        3720.317 ±         53.156   ops/s  [kotlin]
 
-n.d.tricks.MapToArrayBenchmark.map                                       N/A    N/A       N/A  N/A   100000  thrpt    5         187.186 ±          6.689   ops/s  [java]    # slower
+n.d.tricks.MapToArrayBenchmark.map                                       N/A    N/A       N/A  N/A   100000  thrpt    5         187.186 ±          6.689   ops/s  [java]
 n.d.tricks.MapToArrayBenchmark.map                                       N/A    N/A       N/A  N/A   100000  thrpt    5         359.331 ±          2.648   ops/s  [kotlin]
 
 n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A     1000  thrpt    5          32.002 ±          1.800   ops/s  [kotlin]
 n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A     1000  thrpt    5          62.937 ±          2.908   ops/s  [scala]
 n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A     1000  thrpt    5          86.992 ±          2.243   ops/s  [java]
 
-n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A    10000  thrpt    5           1.011 ±          0.156   ops/s  [kotlin]   # slower
+n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A    10000  thrpt    5           1.011 ±          0.156   ops/s  [kotlin]
 n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A    10000  thrpt    5           2.104 ±          0.064   ops/s  [scala]
 n.d.tricks.NoAllocationBenchmark.immutable                               N/A    N/A       N/A  N/A    10000  thrpt    5           2.608 ±          0.226   ops/s  [java]
 
@@ -381,7 +381,7 @@ n.d.tricks.NoPatternMatchingBenchmark.patternMatching                    N/A    
 
 n.d.tricks.NoPatternMatchingBenchmark.patternMatching                    N/A    N/A       N/A  N/A   100000  thrpt    5        9264.839 ±        485.705   ops/s  [scala]
 
-n.d.tricks.PrimitivizeReturnBenchmark.packed                             N/A    N/A       N/A  N/A      N/A  thrpt    5        1032.389 ±        124.839  ops/us  [kotlin]  # slower
+n.d.tricks.PrimitivizeReturnBenchmark.packed                             N/A    N/A       N/A  N/A      N/A  thrpt    5        1032.389 ±        124.839  ops/us  [kotlin]
 n.d.tricks.PrimitivizeReturnBenchmark.packed                             N/A    N/A       N/A  N/A      N/A  thrpt    5        2268.948 ±        705.161  ops/us  [java]
 n.d.tricks.PrimitivizeReturnBenchmark.packed                             N/A    N/A       N/A  N/A      N/A  thrpt    5        2449.084 ±         95.687  ops/us  [scala]
 
@@ -389,7 +389,7 @@ n.d.tricks.PrimitivizeReturnBenchmark.unpacked                           N/A    
 n.d.tricks.PrimitivizeReturnBenchmark.unpacked                           N/A    N/A       N/A  N/A      N/A  thrpt    5         292.086 ±         53.277  ops/us  [java]
 n.d.tricks.PrimitivizeReturnBenchmark.unpacked                           N/A    N/A       N/A  N/A      N/A  thrpt    5         317.479 ±          4.653  ops/us  [scala]
 
-n.d.tricks.SpecializeBenchmark.genericTree                               N/A    N/A       N/A  N/A    10000  thrpt    5     3742154.916 ±     862691.581   ops/s  [kotlin]  # slower
+n.d.tricks.SpecializeBenchmark.genericTree                               N/A    N/A       N/A  N/A    10000  thrpt    5     3742154.916 ±     862691.581   ops/s  [kotlin]
 n.d.tricks.SpecializeBenchmark.genericTree                               N/A    N/A       N/A  N/A    10000  thrpt    5     5577053.226 ±      35407.708   ops/s  [scala]
 n.d.tricks.SpecializeBenchmark.genericTree                               N/A    N/A       N/A  N/A    10000  thrpt    5     7686326.583 ±     733779.517   ops/s  [java]
 
@@ -407,7 +407,7 @@ n.d.tricks.SpecializeBenchmark.intTree                                   N/A    
 
 n.d.tricks.StackInterpreterBenchmark.classic                             N/A    N/A       N/A  N/A      N/A  thrpt    5     7570228.200 ±     209067.024   ops/s  [java]
 n.d.tricks.StackInterpreterBenchmark.classic                             N/A    N/A       N/A  N/A      N/A  thrpt    5     9339433.519 ±     143843.973   ops/s  [scala]
-n.d.tricks.StackInterpreterBenchmark.classic                             N/A    N/A       N/A  N/A      N/A  thrpt    5    14104417.537 ±    1262491.747   ops/s  [kotlin]  # faster
+n.d.tricks.StackInterpreterBenchmark.classic                             N/A    N/A       N/A  N/A      N/A  thrpt    5    14104417.537 ±    1262491.747   ops/s  [kotlin]
 
 n.d.tricks.StackInterpreterBenchmark.interpreted                         N/A    N/A       N/A  N/A      N/A  thrpt    5  7735641567.285 ±  422305199.689   ops/s  [kotlin]
 n.d.tricks.StackInterpreterBenchmark.interpreted                         N/A    N/A       N/A  N/A      N/A  thrpt    5  7864428846.184 ±  570214657.083   ops/s  [java]
