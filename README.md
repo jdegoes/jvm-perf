@@ -51,6 +51,14 @@ Attendance at this workshop is fully remote. Attendees will be provided with a l
     ```bash
     git clone https://github.com/jdegoes/jvm-perf
     ```
+3. Enable your target language, `scala`, `kotlin` or `java`:
+
+     ```bash
+     mv src/main/{language}.skip src/main/{language}
+     ```
+
+     For example, `mv src/main/java.skip src/main/java`.
+
 5. Launch project provided `sbt`.
 
     ```bash
