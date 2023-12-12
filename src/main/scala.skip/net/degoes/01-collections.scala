@@ -66,7 +66,7 @@ class ElementPrependBenchmark {
 }
 
 /**
- * EXERCISE 2
+ * EXERCISE 3
  *
  * Create a benchmark for concatenation across lists, vectors (or some other standard collection
  * type, if not solving these problems in Scala), and arrays.
@@ -87,7 +87,7 @@ class ConcatBenchmark {
 }
 
 /**
- * EXERCISE 3
+ * EXERCISE 4
  *
  * Create a benchmark for random access across lists, vectors (or some other standard collection
  * type, if not solving these problems in Scala), and arrays.
@@ -108,7 +108,7 @@ class RandomAccessBenchmark {
 }
 
 /**
- * EXERCISE 4
+ * EXERCISE 5
  *
  * Create a benchmark for iteration, which sums all the elements in a collection, across lists,
  * vectors (or some other standard collection type, if not solving these problems in Scala), and
@@ -134,7 +134,7 @@ class IterationBenchmark {
 }
 
 /**
- * EXERCISE 5
+ * EXERCISE 6
  *
  * Create a benchmark for lookup of an element by a property of the element, across lists, arrays,
  * and maps.
@@ -193,12 +193,14 @@ class GraduationBenchmark {
     blackhole.consume(c)
   }
 
-  case class Chain[+A]() {
-    def ++[A1 >: A](that: Chain[A1]): Chain[A1] = Chain.empty // TODO
-  }
-  object Chain           {
-    def empty: Chain[Nothing] = Chain()
+}
 
-    def apply[A](as: A*): Chain[A] = Chain() // TODO
-  }
+case class Chain[+A]() {
+  def ++[A1 >: A](that: Chain[A1]): Chain[A1] = Chain.empty // TODO
+}
+
+object Chain           {
+  def empty: Chain[Nothing] = Chain()
+
+  def apply[A](as: A*): Chain[A] = Chain() // TODO
 }

@@ -15,7 +15,7 @@ class JmhExample {
 
   @Benchmark
   def testMethod(blackHole: Blackhole): Double = {
-    val list: List[Int] = List.range(1, Integer.MAX_VALUE / 100)
+    val list: List[Int] = List.range(1, Integer.MAX_VALUE / 100000)
     val sum: Double     = list.sum
     blackHole.consume(sum)
     sum
