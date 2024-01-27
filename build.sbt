@@ -11,7 +11,10 @@ val root = (project in file("."))
       )
     ),
     name           := "jvm-perf",
+    kotlincOptions ++= Seq("-jvm-target", "1.8"),
     libraryDependencies ++= Seq(
+      "org.openjdk.jmh" % "jmh-core" % "1.32",
+      "io.vavr" % "vavr" % "0.10.4",
       // general
       "dev.zio"        %% "zio-json"            % zioJsonVersion,
       "dev.zio"        %% "zio"                 % zioVersion,
@@ -19,6 +22,9 @@ val root = (project in file("."))
       // logging
       "dev.zio"             %% "zio-logging"       % zioLoggingVersion,
       "dev.zio"             %% "zio-logging-slf4j" % zioLoggingVersion,
+
+      // Kotlin standard library
+      "org.jetbrains.kotlin" % "kotlin-stdlib" % kotlinVersion.value,
 
       // test
       "dev.zio"            %% "zio-test-sbt"                    % zioVersion            % Test,
